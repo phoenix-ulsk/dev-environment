@@ -1,5 +1,7 @@
 FROM debian:stretch-slim
 
+WORKDIR /var/www/html/
+
 RUN apt-get update && apt-get install -y \
   php7.0 \
   php7.0-common \
@@ -14,12 +16,18 @@ RUN apt-get update && apt-get install -y \
   php7.0-mcrypt \
   php7.0-fpm \
   php7.0-xdebug \
-  php-pear
+  php-pear \
+  curl \
+  git
 
 RUN phpdismod mysqli
 
 COPY etc/php/7.0/mods-available/xdebug.ini /etc/php/7.0/mods-available/xdebug.ini
 COPY etc/php/7.0/mods-available/opcache.ini /etc/php/7.0/mods-available/opcache.ini
+
+RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" && \
+  php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+  rm /tmp/composer-setup.php
 
 # Change to fpm process later
 CMD ["php-fpm7.0", "-F"]
