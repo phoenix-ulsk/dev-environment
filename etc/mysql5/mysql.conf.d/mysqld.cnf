@@ -1,3 +1,6 @@
+[client]
+socket = /var/run/sock/mysql5.sock
+
 [mysqld_safe]
 socket  = /var/run/sock/mysql5.sock
 nice    = 0
