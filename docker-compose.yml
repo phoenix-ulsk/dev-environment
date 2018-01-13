@@ -91,6 +91,8 @@ services:
       context: ./images/mysql5
     image: webdev-mysql5:latest
     container_name: mysql5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
     volumes:
       - type: tmpfs
         source: sock
