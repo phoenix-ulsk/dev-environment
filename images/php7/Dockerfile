@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
   php7.0-xdebug \
   php-pear \
   curl \
-  git
+  git \
+  mysql-client
 
 RUN phpdismod mysqli
 
@@ -28,6 +29,8 @@ COPY etc/php/7.0/mods-available/opcache.ini /etc/php/7.0/mods-available/opcache.
 RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" && \
   php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   rm /tmp/composer-setup.php
+
+EXPOSE 9000
 
 # Change to fpm process later
 CMD ["php-fpm7.0", "-F"]

@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y \
   php5-xdebug \
   php-pear \
   curl \
-  git
+  git \
+  mysql-client
 
 RUN php5dismod mysqli
 
@@ -29,6 +30,8 @@ COPY etc/php5/mods-available/opcache.ini /etc/php5/mods-available/opcache.ini
 RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" && \
   php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   rm /tmp/composer-setup.php
+
+EXPOSE 9001
 
 # Change to fpm process later
 CMD ["php5-fpm", "-F"]
