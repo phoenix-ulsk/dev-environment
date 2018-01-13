@@ -178,7 +178,7 @@ elif command == "list":
 
 elif command == "bash":
     if len(sys.argv) == 3:
-        os.system("docker exec -it %s bash" % sys.argv[2])
+        os.system("docker exec -it %s /bin/sh" % sys.argv[2])
     else:
         print("Please provide container name or ID")
 
