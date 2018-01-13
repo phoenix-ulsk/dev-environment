@@ -155,7 +155,7 @@ elif command == "purge":
     os.system("docker network rm $(docker network ls -aq)")
 
 elif command == "list":
-    if len(sys.argv) > 3:
+    if len(sys.argv) > 2:
         os.system("docker ps %s" % sys.argv[2])
     else:
         os.system("docker ps")
