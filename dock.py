@@ -56,7 +56,7 @@ dock restart
     Restart containers
 
 dock clean
-    Clean all compiled containers.
+    Clean all compiled containers and their networks
 
 dock purge
     Purge all docker related data from your system
@@ -158,6 +158,7 @@ elif command == "restart":
 
 elif command == "clean":
     os.system("docker stop $(docker ps -aq)")
+    os.system("docker rm --force $(docker ps -aq)")
     os.system("docker container prune --force")
     os.system("docker network prune --force")
     os.system("docker images prune --force")
