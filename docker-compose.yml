@@ -16,7 +16,7 @@ services:
         volume:
           nocopy: true
       - type: bind
-        source: ~/www/
+        source: $HOME/www/
         target: /var/www/
       - type: bind
         source: ./etc/nginx/conf.d/
@@ -40,7 +40,7 @@ services:
         volume:
           nocopy: true
       - type: bind
-        source: ~/www/
+        source: $HOME/www/
         target: /var/www/
       - type: bind
         source: ./etc/php5/fpm/pool.d/
@@ -69,11 +69,17 @@ services:
         volume:
           nocopy: true
       - type: bind
-        source: ~/www/
-        target: /var/www/
+        source: $HOME/www/log/
+        target: /var/www/log/
+      - type: bind
+        source: mysql5
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
       - type: bind
         source: ./etc/mysql5/mysql.conf.d/
         target: /etc/mysql/mysql.conf.d/
 
 volumes:
   sock:
+  mysql5:

@@ -50,12 +50,13 @@ dock logs [CONTAINER IDENTIFIER]
     """);
 
 def dockerPrepare():
-    os.system("mkdir ~/www")
-    os.system("mkdir ~/www/html")
-    os.system("mkdir ~/www/mysql5")
-    os.system("mkdir ~/www/log")
-    os.system("mkdir ~/www/log/nginx")
-    os.system("mkdir ~/www/log/php")
+    os.system("mkdir -p ~/www")
+    os.system("mkdir -p ~/www/html")
+    os.system("mkdir -p ~/www/mysql5")
+    os.system("mkdir -p ~/www/log")
+    os.system("mkdir -p ~/www/log/nginx")
+    os.system("mkdir -p ~/www/log/php")
+    os.system("mkdir -p ~/www/log/mysql5")
 
 def dockerBuild():
     dockerPrepare()
