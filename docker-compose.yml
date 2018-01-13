@@ -27,6 +27,8 @@ services:
       - type: bind
         source: ./etc/nginx/nginx.conf
         target: /etc/nginx/nginx.conf
+    networks:
+      - backend
 
   php5:
     build:
@@ -110,6 +112,26 @@ services:
       - type: bind
         source: ./etc/mysql5/mysql.conf.d/
         target: /etc/mysql/mysql.conf.d/
+
+  phpmyadmin:
+    build:
+      context: ./images/phpmyadmin
+    image: webdev-phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      - PMA_ABSOLUTE_URI=http://phpmyadmin.local/
+    volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
   sock:
