@@ -10,7 +10,7 @@ Installation
 
 Run `./dock.py setup` inside the root directory of this repo. The script requires superuser privileges in order to set up your `/etc/hosts` file. After that, you should be able to use `dock` command from your console in order to manage this environment. The script is saved in `~/.dev-environment/` directory in your home dir.
 
-Managing the environment
+Managing the Environment
 --
 
 Ever feeling lost? Run `dock help` or `dock help all` to see the light.
@@ -25,7 +25,9 @@ If you want to get inside that container, run `dock bash [CONTAINER ID]`. For ex
 
 If you wish to remove all containers and images in order to rebuild them from scratch, do `dock purge`.
 
-Useful Docker commands
+Sometimes things go wrong. Run `dock logs [CONTAINER ID]` to get to the bottom of things. Logs don't lie.
+
+Useful Docker Commands
 --
 
 Build an image: `docker build -t [name]`

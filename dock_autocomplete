@@ -1,0 +1,25 @@
+# dock completion
+
+have dock &&
+_dock()
+{
+    local cur prev special i
+
+    COMPREPLY=()
+    _get_comp_words_by_ref cur prev
+
+    COMPREPLY=( $( compgen -W 'help setup build \
+        run start stop restart clean \
+        purge list bash logs' -- "$cur" ) )
+
+    return 0
+} &&
+complete -F _dock dock
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# sh-indent-comment: t
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh

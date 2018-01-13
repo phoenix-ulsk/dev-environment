@@ -17,8 +17,10 @@ List of available commands:
 dock help
 dock setup
 dock build
+dock run
 dock start
 dock stop
+dock restart
 dock clean
 dock purge
 dock list [OPTIONS]
@@ -41,11 +43,17 @@ doxk setup
 dock build
     Build containers
 
+dock run
+    Build and start containers
+
 dock start
     Build images and start containers with docker compose
 
 dock stop
     Stop running containers
+
+dock restart
+    Restart containers
 
 dock clean
     Clean all compiled containers.
@@ -75,17 +83,16 @@ def dockerSetup():
 127.0.0.1\tdev5.local
 127.0.0.1\tdev.local" >> /etc/hosts""")
 
-        # Add repository dir to as environment variable for future use
-        bash = open("%s/.bash_profile" % HOME, "r+");
-        if "DOCKER_DEV_ENVIRONMENT_DIR" not in bash.read():
-            bash.write("\nexport DOCKER_DEV_ENVIRONMENT_DIR=%s" % SCRIPT_DIR);
-            os.system("source ~/.bash_profile")
-
         # Set up this script as system executable
         if not os.path.exists("~/.dev-environment"):
             os.system("mkdir -p ~/.dev-environment")
             os.system("cp ./dock.py ~/.dev-environment")
             os.system("sudo ln -s %s/.dev-environment/dock.py /usr/local/bin/dock" % HOME)
+
+        # Set up autocomplete script
+        if not os.path.exists("/usr/local/etc/bash_completion.d/dock"):
+            os.system("cp ./dock_autocomplete ~/.dev-environment")
+            os.system("ln -s %s/.dev-environment/dock_autocomplete /usr/local/etc/bash_completion.d/dock" % HOME)
 
         # Create directories for web server
         if not os.path.exists("~/www"):
@@ -95,6 +102,12 @@ def dockerSetup():
             os.system("mkdir -p ~/www/log/nginx")
             os.system("mkdir -p ~/www/log/php")
             os.system("mkdir -p ~/www/log/mysql5")
+
+        # Add repository dir to as environment variable for future use
+        bash = open("%s/.bash_profile" % HOME, "r+");
+        if "DOCKER_DEV_ENVIRONMENT_DIR" not in bash.read():
+            bash.write("\nexport DOCKER_DEV_ENVIRONMENT_DIR=%s" % SCRIPT_DIR);
+            os.system("source ~/.bash_profile")
 
     except IOError as e:
         # You need to have super user permissions to set up hosts settings
@@ -152,7 +165,7 @@ elif command == "purge":
     os.system("docker stop $(docker ps -aq)")
     os.system("docker rm --force $(docker ps -aq)")
     os.system("docker rmi --force $(docker images -aq)")
-    os.system("docker network rm $(docker network ls -aq)")
+    os.system("docker network rm $(docker network ls -q)")
 
 elif command == "list":
     if len(sys.argv) > 2:
