@@ -1,35 +1,39 @@
-How to use this shit. You will need python3 by the way.
+Requirements
+--
 
-Q: How do I run this shit.
-A: First you need to build the containers cause they not gonna build themselves. Use `./dock build` to do it.
-Then run `./dock start` if you are on "UNIX" like system. Cry if you use Windows.
+What do you need to use this shit? You will need **python3** in your system and definitely some kind of Unix environment. Luckily Windows 10 users got the wonderful **Windows Subsystem for Linux** thing. If you have Windows 10 - use it! Makes real OS out of Windows 10. And you will obviously need a **Docker** in your environment.
 
-Q: Is there a way to get the list of all available commands?
-A: Run `./dock help` and read that shit carefully.
+The `dock.py` script has all the things you need to control the Docker containers. You will need to keep the repository though because the script will use docker images from this repository to do its stuff.
 
-Q: And how do I stop all this shit.
-A: Run `./dock stop`, and if you can start this on Windows, sure you know how to stop this shit.
+Installation
+--
 
-Q: How to "ssh" into the running container?
-A: First run `./dock list` and find out [CONTAINER ID] of the running container that you want to get into.
-Then run `./dock bash [CONTAINER ID]` to run `bash` in the context of the container.
+Run `./dock.py setup` inside the root directory of this repo. The script requires superuser privileges in order to set up your `/etc/hosts` file. After that, you should be able to use `dock` command from your console in order to manage this environment. The script is saved in `~/.dev-environment/` directory in your home dir.
 
-Q: I played with my private parts and these scripts a little and now there are all kind of containers and
-images all over my machine, what should I do?
-A: Just run `./dock purge` and it will remove all your docker images and containers.
+Managing the environment
+--
 
-Useful Docker commands:
-Build an image:
-  docker build -t [name] .
+Ever feeling lost? Run `dock help` or `dock help all` to see the light.
 
-Run container detached in background (indefinitely):
-  docker run -dt [image name]
+If you trying to set up the environment for the first time, run `dock build` to build Docker containers and then `dock start` to run them. Or you can just run `dock run` and do both with one command, how neet!
 
-List all active docker containers:
-  docker ps -a
+If you built these images you can just run `dock start`, it's faster. Run `dock stop` to stop all containers.
 
-Inspect the container (network address and all)
-  docker inspect [container id]
+Run `dock list` to get the list of running containers.
 
-SSH into container:
-  docker exec -it [container id] /bin/bash
+If you want to get inside that container, run `dock bash [CONTAINER ID]`. For example, you can run `dock bash nginx` to get all close and personal with that Nginx container serving your shit.
+
+If you wish to remove all containers and images in order to rebuild them from scratch, do `dock purge`.
+
+Useful Docker commands
+--
+
+Build an image: `docker build -t [name]`
+
+Run container detached in background (indefinitely): `docker run -dt [image name]`
+
+List all active docker containers: `docker ps -a`
+
+Inspect the container (network address and all): `docker inspect [container id]`
+
+SSH into container: `docker exec -it [container id] /bin/bash`
