@@ -55,5 +55,25 @@ services:
         source: ./etc/php5/fpm/php-fpm.conf
         target: /etc/php5/fpm/php-fpm.conf
 
+  mysql5:
+    build:
+      context: ./images/mysql5
+    image: webdev-mysql5:latest
+    container_name: mysql5
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
+      - type: bind
+        source: ~/www/
+        target: /var/www/
+      - type: bind
+        source: ./etc/mysql5/mysql.conf.d/
+        target: /etc/mysql/mysql.conf.d/
+
 volumes:
   sock:
