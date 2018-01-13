@@ -52,7 +52,6 @@ dock logs [CONTAINER IDENTIFIER]
 def dockerPrepare():
     os.system("mkdir -p ~/www")
     os.system("mkdir -p ~/www/html")
-    os.system("mkdir -p ~/www/mysql5")
     os.system("mkdir -p ~/www/log")
     os.system("mkdir -p ~/www/log/nginx")
     os.system("mkdir -p ~/www/log/php")
