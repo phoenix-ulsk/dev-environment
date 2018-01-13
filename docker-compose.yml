@@ -1,0 +1,59 @@
+version: "3.2"
+
+services:
+  nginx:
+    build:
+      context: ./images/nginx
+    image: webdev-nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
+      - type: bind
+        source: ~/www/
+        target: /var/www/
+      - type: bind
+        source: ./etc/nginx/conf.d/
+        target: /etc/nginx/conf.d/
+      - type: bind
+        source: ./etc/nginx/fastcgi_params
+        target: /etc/nginx/fastcgi_params
+      - type: bind
+        source: ./etc/nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+
+  php5:
+    build:
+      context: ./images/php5
+    image: webdev-php5:latest
+    container_name: php5
+    volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
+      - type: bind
+        source: ~/www/
+        target: /var/www/
+      - type: bind
+        source: ./etc/php5/fpm/pool.d/
+        target: /etc/php5/fpm/pool.d/
+      - type: bind
+        source: ./etc/php5/cli/php.ini
+        target: /etc/php5/cli/php.ini
+      - type: bind
+        source: ./etc/php5/fpm/php.ini
+        target: /etc/php5/fpm/php.ini
+      - type: bind
+        source: ./etc/php5/fpm/php-fpm.conf
+        target: /etc/php5/fpm/php-fpm.conf
+
+volumes:
+  sock:
