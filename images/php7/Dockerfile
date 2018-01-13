@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y \
   php-pear \
   curl \
   git \
-  mysql-client
+  mysql-client \
+  ssmtp
 
 RUN phpdismod mysqli
 

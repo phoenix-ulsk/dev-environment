@@ -58,6 +58,11 @@ services:
       - type: bind
         source: ./etc/php/5.6/fpm/php-fpm.conf
         target: /etc/php5/fpm/php-fpm.conf
+      - type: bind
+        source: ./etc/php/5.6/ssmtp.conf
+        target: /etc/ssmtp/ssmtp.conf
+    networks:
+      - backend
 
   php7:
     build:
@@ -87,6 +92,11 @@ services:
       - type: bind
         source: ./etc/php/7.0/fpm/php-fpm.conf
         target: /etc/php/7.0/fpm/php-fpm.conf
+      - type: bind
+        source: ./etc/php/7.0/ssmtp.conf
+        target: /etc/ssmtp/ssmtp.conf
+    networks:
+      - backend
 
   mysql5:
     build:
@@ -126,6 +136,14 @@ services:
         target: /var/run/sock/
         volume:
           nocopy: true
+    networks:
+      - backend
+
+  mailcatcher:
+    build:
+      context: ./images/mailcatcher
+    image: webdev-mailcatcher:latest
+    container_name: mailcatcher
     networks:
       - backend
 

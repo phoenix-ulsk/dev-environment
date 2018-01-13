@@ -82,7 +82,8 @@ def dockerSetup():
 127.0.0.1\tlocalunixsocket
 127.0.0.1\tdev.local
 127.0.0.1\tdev5.local
-127.0.0.1\tphpmyadmin.local" >> /etc/hosts""")
+127.0.0.1\tphpmyadmin.local
+127.0.0.1\tmailcatcher.local" >> /etc/hosts""")
 
         # Set up this script as system executable
         if not os.path.exists("~/.dev-environment"):
