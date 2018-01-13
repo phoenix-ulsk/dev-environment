@@ -43,17 +43,44 @@ services:
         source: $HOME/www/
         target: /var/www/
       - type: bind
-        source: ./etc/php5/fpm/pool.d/
+        source: ./etc/php/5.6/fpm/pool.d/
         target: /etc/php5/fpm/pool.d/
       - type: bind
-        source: ./etc/php5/cli/php.ini
+        source: ./etc/php/5.6/cli/php.ini
         target: /etc/php5/cli/php.ini
       - type: bind
-        source: ./etc/php5/fpm/php.ini
+        source: ./etc/php/5.6/fpm/php.ini
         target: /etc/php5/fpm/php.ini
       - type: bind
-        source: ./etc/php5/fpm/php-fpm.conf
+        source: ./etc/php/5.6/fpm/php-fpm.conf
         target: /etc/php5/fpm/php-fpm.conf
+
+  php7:
+    build:
+      context: ./images/php7
+    image: webdev-php7:latest
+    container_name: php7
+    volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
+      - type: bind
+        source: $HOME/www/
+        target: /var/www/
+      - type: bind
+        source: ./etc/php/7.0/fpm/pool.d/
+        target: /etc/php/7.0/fpm/pool.d/
+      - type: bind
+        source: ./etc/php/7.0/cli/php.ini
+        target: /etc/php/7.0/cli/php.ini
+      - type: bind
+        source: ./etc/php/7.0/fpm/php.ini
+        target: /etc/php/7.0/fpm/php.ini
+      - type: bind
+        source: ./etc/php/7.0/fpm/php-fpm.conf
+        target: /etc/php/7.0/fpm/php-fpm.conf
 
   mysql5:
     build:
