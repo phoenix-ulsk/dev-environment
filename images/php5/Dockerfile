@@ -26,8 +26,13 @@ RUN apt-get update && apt-get install -y \
 
 RUN php5dismod mysqli
 
+ADD etc/php5/fpm/pool.d /etc/php5/fpm/pool.d
+COPY etc/php5/cli/php.ini /etc/php5/cli/php.ini
+COPY etc/php5/fpm/php.ini /etc/php5/fpm/php.ini
+COPY etc/php5/fpm/php-fpm.conf /etc/php5/fpm/php-fpm.conf
 COPY etc/php5/mods-available/xdebug.ini /etc/php5/mods-available/xdebug.ini
 COPY etc/php5/mods-available/opcache.ini /etc/php5/mods-available/opcache.ini
+COPY etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf
 
 RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" && \
   php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \

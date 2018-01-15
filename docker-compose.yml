@@ -10,23 +10,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
-        target: /var/www/
-      - type: bind
-        source: ./etc/nginx/conf.d/
-        target: /etc/nginx/conf.d/
-      - type: bind
-        source: ./etc/nginx/fastcgi_params
-        target: /etc/nginx/fastcgi_params
-      - type: bind
-        source: ./etc/nginx/nginx.conf
-        target: /etc/nginx/nginx.conf
     networks:
       - backend
 
@@ -38,29 +27,12 @@ services:
     ports:
       - "9001:9001"
     volumes:
+      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
-        target: /var/www/
-      - type: bind
-        source: ./etc/php/5.6/fpm/pool.d/
-        target: /etc/php5/fpm/pool.d/
-      - type: bind
-        source: ./etc/php/5.6/cli/php.ini
-        target: /etc/php5/cli/php.ini
-      - type: bind
-        source: ./etc/php/5.6/fpm/php.ini
-        target: /etc/php5/fpm/php.ini
-      - type: bind
-        source: ./etc/php/5.6/fpm/php-fpm.conf
-        target: /etc/php5/fpm/php-fpm.conf
-      - type: bind
-        source: ./etc/php/5.6/ssmtp.conf
-        target: /etc/ssmtp/ssmtp.conf
     networks:
       - backend
 
@@ -72,29 +44,12 @@ services:
     ports:
       - "9000:9000"
     volumes:
+      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
-        target: /var/www/
-      - type: bind
-        source: ./etc/php/7.0/fpm/pool.d/
-        target: /etc/php/7.0/fpm/pool.d/
-      - type: bind
-        source: ./etc/php/7.0/cli/php.ini
-        target: /etc/php/7.0/cli/php.ini
-      - type: bind
-        source: ./etc/php/7.0/fpm/php.ini
-        target: /etc/php/7.0/fpm/php.ini
-      - type: bind
-        source: ./etc/php/7.0/fpm/php-fpm.conf
-        target: /etc/php/7.0/fpm/php-fpm.conf
-      - type: bind
-        source: ./etc/php/7.0/ssmtp.conf
-        target: /etc/ssmtp/ssmtp.conf
     networks:
       - backend
 
@@ -106,6 +61,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
+      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
@@ -116,12 +72,6 @@ services:
         target: /var/lib/mysql
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/log/
-        target: /var/www/log/
-      - type: bind
-        source: ./etc/mysql5/mysql.conf.d/
-        target: /etc/mysql/mysql.conf.d/
 
   phpmyadmin:
     build:
