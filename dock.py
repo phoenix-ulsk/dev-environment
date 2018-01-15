@@ -120,6 +120,7 @@ def dockerSetup():
             os.system("mkdir -p ~/www/log/nginx")
             os.system("mkdir -p ~/www/log/php")
             os.system("mkdir -p ~/www/log/mysql5")
+            os.system("chmod 0777 ~/www/log/mysql5")
 
         # Add repository dir to as environment variable for future use
         bash = open(BASH_PROFILE, "r+");
