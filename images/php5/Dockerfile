@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
   curl \
   git \
   mysql-client \
+  zip \
   ssmtp
 
 RUN php5dismod mysqli

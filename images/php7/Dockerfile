@@ -16,10 +16,12 @@ RUN apt-get update && apt-get install -y \
   php7.0-mcrypt \
   php7.0-fpm \
   php7.0-xdebug \
+  php7.0-mbstring \
   php-pear \
   curl \
   git \
   mysql-client \
+  zip \
   ssmtp
 
 RUN phpdismod mysqli
