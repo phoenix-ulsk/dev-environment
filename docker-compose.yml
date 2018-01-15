@@ -147,6 +147,14 @@ services:
     networks:
       - backend
 
+  memcached:
+    build:
+      context: ./images/memcached
+    image: webdev-memcached:latest
+    container_name: memcached
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge
