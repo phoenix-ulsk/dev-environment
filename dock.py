@@ -10,6 +10,18 @@ if "DOCKER_DEV_ENVIRONMENT_DIR" in os.environ.keys():
 else:
     DOCKER_DIR = SCRIPT_DIR
 
+# Set system specific variables, required in the SCRIPT_DIR
+if sys.platform == "darwin":
+    HOSTS_FILE = "/etc/hosts"
+    AUTOCOMPLETE_DIR = "/usr/local/etc/bash_completion.d"
+    EXECUTABLE_DIR = "/usr/local/bin"
+    BASH_PROFILE = "{0}/.bash_profile".format(HOME)
+elif sys.platform == "linux":
+    HOSTS_FILE = "/etc/hosts"
+    AUTOCOMPLETE_DIR = "/etc/bash_completion.d"
+    EXECUTABLE_DIR = "/usr/local/bin"
+    BASH_PROFILE = "{0}/.profile".format(HOME)
+
 def printHelp():
     print("""
 List of available commands:
@@ -76,25 +88,29 @@ def dockerSetup():
 
     try:
         # Set up hosts file
-        hosts = open("/etc/hosts", "r");
+        hosts = open(HOSTS_FILE, "r");
         if "dev.local" not in hosts.read():
-            os.system("""sudo echo "
+            HOSTS_LIST = """
 127.0.0.1\tlocalunixsocket
 127.0.0.1\tdev.local
 127.0.0.1\tdev5.local
 127.0.0.1\tphpmyadmin.local
-127.0.0.1\tmailcatcher.local" >> /etc/hosts""")
+127.0.0.1\tmailcatcher.local"""
+            os.system("echo \"{0}\" | sudo tee -a /etc/hosts > /dev/null".format(HOSTS_LIST))
 
         # Set up this script as system executable
         if not os.path.exists("~/.dev-environment"):
             os.system("mkdir -p ~/.dev-environment")
             os.system("cp ./dock.py ~/.dev-environment")
-            os.system("sudo ln -s %s/.dev-environment/dock.py /usr/local/bin/dock" % HOME)
+            os.system("sudo ln -s {0}/.dev-environment/dock.py {1}/dock".format(HOME, EXECUTABLE_DIR))
 
         # Set up autocomplete script
-        if not os.path.exists("/usr/local/etc/bash_completion.d/dock"):
+        if not os.path.exists("{0}/dock".format(AUTOCOMPLETE_DIR)):
             os.system("cp ./dock_autocomplete ~/.dev-environment")
-            os.system("ln -s %s/.dev-environment/dock_autocomplete /usr/local/etc/bash_completion.d/dock" % HOME)
+            if sys.platform == "darwin":
+                os.system("ln -s {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
+            else:
+                os.system("sudo cp {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
 
         # Create directories for web server
         if not os.path.exists("~/www"):
@@ -106,9 +122,9 @@ def dockerSetup():
             os.system("mkdir -p ~/www/log/mysql5")
 
         # Add repository dir to as environment variable for future use
-        bash = open("%s/.bash_profile" % HOME, "r+");
+        bash = open(BASH_PROFILE, "r+");
         if "DOCKER_DEV_ENVIRONMENT_DIR" not in bash.read():
-            bash.write("\nexport DOCKER_DEV_ENVIRONMENT_DIR=%s" % SCRIPT_DIR);
+            bash.write("\nexport DOCKER_DEV_ENVIRONMENT_DIR={0}".format(SCRIPT_DIR));
             os.system("source ~/.bash_profile")
 
     except IOError as e:
@@ -118,13 +134,13 @@ def dockerSetup():
         sys.exit(1)
 
 def dockerBuild():
-    os.system("docker-compose -f %s/docker-compose.yml build" % DOCKER_DIR)
+    os.system("docker-compose -f {0}/docker-compose.yml build".format(DOCKER_DIR))
 
 def dockerStart():
-    os.system("docker-compose -f %s/docker-compose.yml up -d" % DOCKER_DIR)
+    os.system("docker-compose -f {0}/docker-compose.yml up -d".format(DOCKER_DIR))
 
 def dockerStop():
-    os.system("docker-compose -f %s/docker-compose.yml stop" % DOCKER_DIR)
+    os.system("docker-compose -f {0}/docker-compose.yml stop".format(DOCKER_DIR))
 
 if len(sys.argv) > 1:
     command = sys.argv[1]
@@ -172,18 +188,25 @@ elif command == "purge":
 
 elif command == "list":
     if len(sys.argv) > 2:
-        os.system("docker ps %s" % sys.argv[2])
+        os.system("docker ps {0}".format(sys.argv[2]))
     else:
         os.system("docker ps")
 
 elif command == "bash":
+    shells = ["/bin/bash", "/bin/sh"]
+
     if len(sys.argv) == 3:
-        os.system("docker exec -it %s /bin/sh" % sys.argv[2])
+        for shell in shells:
+            try:
+                os.system("docker exec -it {0} {1}".format(sys.argv[2], shell))
+                break
+            except:
+                pass
     else:
         print("Please provide container name or ID")
 
 elif command == "logs":
     if len(sys.argv) == 3:
-        os.system("docker logs %s" % sys.argv[2])
+        os.system("docker logs {0}".format(sys.argv[2]))
     else:
         print("Please provide container name or ID")
