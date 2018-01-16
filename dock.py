@@ -2,26 +2,6 @@
 import os
 import sys
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-HOME = os.environ["HOME"]
-
-if "DOCKER_DEV_ENVIRONMENT_DIR" in os.environ.keys():
-    DOCKER_DIR = os.environ["DOCKER_DEV_ENVIRONMENT_DIR"]
-else:
-    DOCKER_DIR = SCRIPT_DIR
-
-# Set system specific variables, required in the SCRIPT_DIR
-if sys.platform == "darwin":
-    HOSTS_FILE = "/etc/hosts"
-    AUTOCOMPLETE_DIR = "/usr/local/etc/bash_completion.d"
-    EXECUTABLE_DIR = "/usr/local/bin"
-    BASH_PROFILE = "{0}/.bash_profile".format(HOME)
-elif sys.platform == "linux":
-    HOSTS_FILE = "/etc/hosts"
-    AUTOCOMPLETE_DIR = "/etc/bash_completion.d"
-    EXECUTABLE_DIR = "/usr/local/bin"
-    BASH_PROFILE = "{0}/.profile".format(HOME)
-
 def printHelp():
     print("""
 List of available commands:
@@ -92,21 +72,21 @@ def dockerSetup():
         if "dev.local" not in hosts.read():
             HOSTS_LIST = """
 127.0.0.1\tlocalunixsocket
-127.0.0.1\tdev.local
-127.0.0.1\tdev5.local
-127.0.0.1\tphpmyadmin.local
-127.0.0.1\tmailcatcher.local"""
+{0}\tdev.local
+{0}\tdev5.local
+{0}\tphpmyadmin.local
+{0}\tmailcatcher.local""".format(DOCKER_MACHINE_IP)
             os.system("echo \"{0}\" | sudo tee -a /etc/hosts > /dev/null".format(HOSTS_LIST))
 
         # Set up this script as system executable
         if not os.path.exists("~/.dev-environment"):
             os.system("mkdir -p ~/.dev-environment")
-            os.system("cp ./dock.py ~/.dev-environment")
+            os.system("cp {0}/dock.py ~/.dev-environment".format(DOCKER_DIR))
             os.system("sudo ln -s {0}/.dev-environment/dock.py {1}/dock".format(HOME, EXECUTABLE_DIR))
 
         # Set up autocomplete script
         if not os.path.exists("{0}/dock".format(AUTOCOMPLETE_DIR)):
-            os.system("cp ./dock_autocomplete ~/.dev-environment")
+            os.system("cp {0}/dock_autocomplete ~/.dev-environment".format(DOCKER_DIR))
             if sys.platform == "darwin":
                 os.system("ln -s {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
             else:
@@ -119,8 +99,6 @@ def dockerSetup():
             os.system("mkdir -p ~/www/log")
             os.system("mkdir -p ~/www/log/nginx")
             os.system("mkdir -p ~/www/log/php")
-            os.system("mkdir -p ~/www/log/mysql5")
-            os.system("chmod 0777 ~/www/log/mysql5")
 
         # Add repository dir to as environment variable for future use
         bash = open(BASH_PROFILE, "r+");
@@ -130,7 +108,6 @@ def dockerSetup():
 
     except IOError as e:
         # You need to have super user permissions to set up hosts settings
-        print(e)
         print("You need to super user permissions in order to execute this command")
         sys.exit(1)
 
@@ -142,6 +119,63 @@ def dockerStart():
 
 def dockerStop():
     os.system("docker-compose -f {0}/docker-compose.yml stop".format(DOCKER_DIR))
+
+def dockerBash(container):
+    shells = ["/bin/bash", "/bin/sh"]
+
+    for shell in shells:
+        try:
+            os.system("docker exec -it {0} {1}".format(container, shell))
+            break
+        except:
+            pass
+
+# Search for available docker machines named like default or dev
+def getDockerMachinesList():
+    mlist = []
+    cmd_output = os.popen("docker-machine ls --filter name=de --format \"{{.Name}}\"")
+
+    for line in cmd_output.readlines():
+        mlist.append(line.strip())
+
+    return mlist
+
+def getDockerMachineIpByName(name):
+    return os.popen("docker-machine ip {0}".format(name)).read().strip()
+
+#### [START] Init application variables ####
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+HOME = os.environ["HOME"]
+
+if "DOCKER_DEV_ENVIRONMENT_DIR" in os.environ.keys():
+    DOCKER_DIR = os.environ["DOCKER_DEV_ENVIRONMENT_DIR"]
+else:
+    DOCKER_DIR = SCRIPT_DIR
+
+machines_list = getDockerMachinesList()
+DOCKER_MACHINE_IP = "127.0.0.1"
+
+# Set system specific variables, required in the SCRIPT_DIR
+if sys.platform == "darwin":
+    HOSTS_FILE = "/etc/hosts"
+    AUTOCOMPLETE_DIR = "/usr/local/etc/bash_completion.d"
+    EXECUTABLE_DIR = "/usr/local/bin"
+    BASH_PROFILE = "{0}/.bash_profile".format(HOME)
+
+    if len(machines_list) > 0:
+        DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
+
+elif sys.platform == "linux":
+    HOSTS_FILE = "/etc/hosts"
+    AUTOCOMPLETE_DIR = "/etc/bash_completion.d"
+    EXECUTABLE_DIR = "/usr/local/bin"
+    BASH_PROFILE = "{0}/.profile".format(HOME)
+
+    if len(machines_list) > 0:
+        DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
+
+#### [END] Init application variables ####
 
 if len(sys.argv) > 1:
     command = sys.argv[1]
@@ -194,15 +228,8 @@ elif command == "list":
         os.system("docker ps")
 
 elif command == "bash":
-    shells = ["/bin/bash", "/bin/sh"]
-
     if len(sys.argv) == 3:
-        for shell in shells:
-            try:
-                os.system("docker exec -it {0} {1}".format(sys.argv[2], shell))
-                break
-            except:
-                pass
+        dockerBash(sys.argv[2])
     else:
         print("Please provide container name or ID")
 
