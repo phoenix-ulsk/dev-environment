@@ -15,9 +15,11 @@ services:
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
+      - type: volume
+        source: www-volume
         target: /var/www/
+        volume:
+          nocopy: true
     networks:
       - backend
 
@@ -34,9 +36,11 @@ services:
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
+      - type: volume
+        source: www-volume
         target: /var/www/
+        volume:
+          nocopy: true
     networks:
       - backend
 
@@ -53,9 +57,11 @@ services:
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/
+      - type: volume
+        source: www-volume
         target: /var/www/
+        volume:
+          nocopy: true
     networks:
       - backend
 
@@ -77,8 +83,8 @@ services:
         target: /var/lib/mysql/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/log/mysql5/
+      - type: volume
+        source: mysql5-logs
         target: /var/www/log/mysql5/
 
   phpmyadmin:
@@ -120,3 +126,7 @@ networks:
 volumes:
   sock:
   mysql5:
+  www-volume:
+    external: true
+  mysql5-logs:
+    external: true

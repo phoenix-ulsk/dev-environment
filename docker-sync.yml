@@ -1,0 +1,13 @@
+version: "2"
+
+options:
+  compose-file-path: 'docker-compose.yml'
+
+syncs:
+  www-volume:
+    src: '~/www'
+    sync_host_ip: 'auto'
+    watch_excludes: ['.*/.git', '.*/node_modules', '.*/bower_components', '.*/sass-cache', '.*/.sass-cache', '.*/.sass-cache', '.*/var/run', '.*/var/log', '.*/var/datacache', '.coffee', '.scss', '.sass', '.gitignore']
+
+  mysql5-logs:
+    src: '~/www/log/mysql5'
