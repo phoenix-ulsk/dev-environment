@@ -138,13 +138,13 @@ def dockerSetup():
 
 def dockerBuild():
     if sys.platform == "darwin":
-        os.system("docker-sync start -c {0}/docker-sync.yml".format(DOCKER_DIR))
+        os.system("cd {0} && docker-sync start".format(DOCKER_DIR))
 
     os.system("docker-compose -f {0}/docker-compose.yml build".format(DOCKER_DIR))
 
 def dockerStart():
     if sys.platform == "darwin":
-        os.system("docker-sync start -c {0}/docker-sync.yml".format(DOCKER_DIR))
+        os.system("cd {0} && docker-sync start".format(DOCKER_DIR))
 
     os.system("docker-compose -f {0}/docker-compose.yml up -d".format(DOCKER_DIR))
 
@@ -152,7 +152,7 @@ def dockerStop():
     os.system("docker-compose -f {0}/docker-compose.yml stop".format(DOCKER_DIR))
 
     if sys.platform == "darwin":
-        os.system("docker-sync stop -c {0}/docker-sync.yml".format(DOCKER_DIR))
+        os.system("cd {0} && docker-sync stop".format(DOCKER_DIR))
 
 def dockerBash(container):
     shells = ["/bin/bash", "/bin/sh"]
@@ -257,16 +257,22 @@ elif command == "clean":
     os.system("docker rm --force $(docker ps -aq)")
     os.system("docker container prune --force")
     os.system("docker network prune --force")
-    os.system("docker images prune --force")
+
+    if sys.platform == "darwin":
+        os.system("cd {0} && docker-sync clean".format(DOCKER_DIR))
 
 elif command == "purge":
     os.system("docker stop $(docker ps -aq)")
     os.system("docker rm --force $(docker ps -aq)")
     os.system("docker rmi --force $(docker images -aq)")
     os.system("docker network rm $(docker network ls -q)")
+    os.system("docker volume prune --force")
 
     if sys.platform == "darwin":
-        os.system("docker-sync clean")
+        os.system("cd {0} && docker-sync clean".format(DOCKER_DIR))
+
+    # Fix for mysql5 isses with access rights on container purge
+    os.system("rm -rf {0}/www/log/mysql5/*".format(HOME))
 
 elif command == "list":
     if len(sys.argv) > 2:
