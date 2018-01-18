@@ -38,7 +38,7 @@ RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php')
   php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   rm /tmp/composer-setup.php
 
-EXPOSE 9000
+EXPOSE 9002
 
 # Change to fpm process later
 CMD ["php-fpm7.0", "-F"]

@@ -46,7 +46,7 @@ services:
     image: webdev-php7:latest
     container_name: php7
     ports:
-      - "9000:9000"
+      - "9002:9002"
     volumes:
       - type: tmpfs
         source: sock
@@ -74,9 +74,12 @@ services:
           nocopy: true
       - type: volume
         source: mysql5
-        target: /var/lib/mysql
+        target: /var/lib/mysql/
         volume:
           nocopy: true
+      - type: bind
+        source: $HOME/www/log/mysql5/
+        target: /var/www/log/mysql5/
 
   phpmyadmin:
     build:

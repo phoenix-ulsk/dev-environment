@@ -117,12 +117,13 @@ def dockerSetup():
                 os.system("sudo cp {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
 
         # Create directories for web server
-        if not os.path.exists("~/www"):
-            os.system("mkdir -p ~/www")
-            os.system("mkdir -p ~/www/html")
-            os.system("mkdir -p ~/www/log")
-            os.system("mkdir -p ~/www/log/nginx")
-            os.system("mkdir -p ~/www/log/php")
+        if not os.path.exists("{0}/www".format(HOME)):
+            os.system("mkdir -p {0}/www".format(HOME))
+            os.system("mkdir -p {0}/www/html".format(HOME))
+            os.system("mkdir -p {0}/www/log".format(HOME))
+            os.system("mkdir -p {0}/www/log/nginx".format(HOME))
+            os.system("mkdir -p {0}/www/log/php".format(HOME))
+            os.system("mkdir -p {0}/www/log/mysql5".format(HOME))
 
         # Add repository dir to as environment variable for future use
         bash = open(BASH_PROFILE, "r+");
