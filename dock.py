@@ -37,6 +37,7 @@ dock run
 dock start
 dock stop
 dock restart
+dock sync
 dock clean
 dock purge
 dock list [OPTIONS]
@@ -70,6 +71,9 @@ dock stop
 
 dock restart
     Restart containers
+
+dock sync
+    Sync the docker-sync shared folders (OSX only)
 
 dock clean
     Clean all compiled containers and their networks
@@ -251,6 +255,10 @@ elif command == "stop":
 elif command == "restart":
     dockerStop()
     dockerStart()
+
+elif command == "sync":
+    if sys.platform == "darwin":
+        os.system("cd {0} && docker-sync sync".format(DOCKER_DIR))
 
 elif command == "clean":
     os.system("docker stop $(docker ps -aq)")
