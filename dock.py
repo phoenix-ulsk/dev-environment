@@ -1,6 +1,27 @@
 #!/usr/bin/env python3
 import os
 import sys
+import subprocess
+
+def checkRequirements():
+    missing_requirements = []
+
+    for packet, command in REQUIREMENTS.items():
+        (code, res) = subprocess.getstatusoutput(command)
+
+        if code > 0:
+            missing_requirements.append(packet)
+
+    if len(missing_requirements) > 0:
+        for packet in missing_requirements:
+            print("\33[1;31;40m{0} is required. Please install {0}.".format(packet))
+
+        os.system("tput sgr0")
+        sys.exit(1)
+
+def checkoutSystemBranch():
+    if sys.platform == "darwin":
+        os.system("git --git-dir={0}/.git checkout osx/php+mysql".format(DOCKER_DIR))
 
 def printHelp():
     print("""
@@ -148,6 +169,12 @@ def getDockerMachineIpByName(name):
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 HOME = os.environ["HOME"]
 
+REQUIREMENTS = {
+    "git": "git --version",
+    "docker": "docker --version",
+    "docker-compose": "docker-compose --version",
+}
+
 if "DOCKER_DEV_ENVIRONMENT_DIR" in os.environ.keys():
     DOCKER_DIR = os.environ["DOCKER_DEV_ENVIRONMENT_DIR"]
 else:
@@ -162,6 +189,7 @@ if sys.platform == "darwin":
     AUTOCOMPLETE_DIR = "/usr/local/etc/bash_completion.d"
     EXECUTABLE_DIR = "/usr/local/bin"
     BASH_PROFILE = "{0}/.bash_profile".format(HOME)
+    REQUIREMENTS["docker-sync"] = "docker-sync --version"
 
     if len(machines_list) > 0:
         DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
@@ -176,6 +204,9 @@ elif sys.platform == "linux":
         DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
 
 #### [END] Init application variables ####
+
+checkRequirements()
+checkoutSystemBranch()
 
 if len(sys.argv) > 1:
     command = sys.argv[1]
