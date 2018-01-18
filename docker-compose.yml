@@ -10,12 +10,14 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
+      - type: bind
+        source: $HOME/www/
+        target: /var/www/
     networks:
       - backend
 
@@ -27,12 +29,14 @@ services:
     ports:
       - "9001:9001"
     volumes:
-      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
+      - type: bind
+        source: $HOME/www/
+        target: /var/www/
     networks:
       - backend
 
@@ -44,12 +48,14 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
+      - type: bind
+        source: $HOME/www/
+        target: /var/www/
     networks:
       - backend
 
@@ -61,7 +67,6 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
-      - $HOME/www/:/var/www/:cached
       - type: tmpfs
         source: sock
         target: /var/run/sock/
