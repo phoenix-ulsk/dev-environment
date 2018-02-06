@@ -10,6 +10,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - type: tmpfs
+        source: sock
+        target: /var/run/sock/
+        volume:
+          nocopy: true
       - type: bind
         source: $HOME/www/
         target: /var/www/
