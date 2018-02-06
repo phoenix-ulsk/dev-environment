@@ -59,6 +59,9 @@ COPY etc/php/5.6 /etc/php/5.6
 COPY etc/php/7.1 /etc/php/7.1
 COPY etc/nginx /etc/nginx
 
+# Add nginx to www-data grout
+RUN adduser nginx www-data
+
 # Install composer
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
@@ -79,4 +82,10 @@ RUN mkdir /etc/ssl/self_signed/ \
     -out /etc/ssl/self_signed/self_signed.crt \
     -subj "/C=GO/ST=Gondor/L=Minas Tirith/O=Heren Istarion"
 
+# Copy wrapper script to run all php-fpm daemons
+COPY root/wrapper_script.sh /root/wrapper_script.sh
+RUN chmod 0755 /root/wrapper_script.sh
+
 EXPOSE 80 443
+
+CMD /root/wrapper_script.sh
