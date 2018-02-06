@@ -1,58 +1,15 @@
 version: "3.2"
 
 services:
-  nginx:
+  webserver:
     build:
-      context: ./images/nginx
-    image: webdev-nginx:latest
-    container_name: nginx
+      context: ./images/webserver
+    image: webdev-webserver:latest
+    container_name: webserver
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - type: tmpfs
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
-      - type: bind
-        source: $HOME/www/
-        target: /var/www/
-    networks:
-      - backend
-
-  php5:
-    build:
-      context: ./images/php5
-    image: webdev-php5:latest
-    container_name: php5
-    ports:
-      - "9001:9001"
-    volumes:
-      - type: tmpfs
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
-      - type: bind
-        source: $HOME/www/
-        target: /var/www/
-    networks:
-      - backend
-
-  php7:
-    build:
-      context: ./images/php7
-    image: webdev-php7:latest
-    container_name: php7
-    ports:
-      - "9002:9002"
-    volumes:
-      - type: tmpfs
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
       - type: bind
         source: $HOME/www/
         target: /var/www/
