@@ -127,7 +127,7 @@ def dockerSetup():
             os.system("mkdir -p {0}/www/log".format(HOME))
             os.system("mkdir -p {0}/www/log/nginx".format(HOME))
             os.system("mkdir -p {0}/www/log/php".format(HOME))
-            os.system("mkdir -p {0}/www/log/mysql5".format(HOME))
+            # os.system("mkdir -p {0}/www/log/mysql5".format(HOME))
 
         # Add repository dir to as environment variable for future use
         bash = open(BASH_PROFILE, "r+");

@@ -34,9 +34,6 @@ services:
         target: /var/lib/mysql/
         volume:
           nocopy: true
-      - type: bind
-        source: $HOME/www/log/mysql5/
-        target: /var/www/log/mysql5/
 
   phpmyadmin:
     build:
