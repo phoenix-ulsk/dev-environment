@@ -157,9 +157,9 @@ def dockerSetup():
 
         # Add repository dir to as environment variable for future use
         if not os.path.exists(config["system"]["bash_profile"]):
-            os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee -a {1} > /dev/null"
+            os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee {1} > /dev/null"
                 .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
-            os.system("source {0}".format(config["system"]["bash_profile"]))
+            os.system("export DOCKER_DEV_ENVIRONMENT_DIR={0}".format(config["system"]["src_dir"]))
 
     except IOError as e:
         # You need to have super user permissions to set up hosts settings
