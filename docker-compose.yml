@@ -16,7 +16,7 @@ services:
         volume:
           nocopy: true
       - type: bind
-        source: $HOME/www/
+        source: /var/www/
         target: /var/www/
     networks:
       - backend
