@@ -124,10 +124,11 @@ def dockerSetup():
         hosts = open(config["system"]["hosts"], "r");
         if "dev.local" not in hosts.read():
             hosts_list = """
+{0}\tdev.local
 {0}\tdev5.local
 {0}\tdev70.local
-{0}\tdev.local
 {0}\tdev71.local
+{0}\tdev72.local
 {0}\tphpmyadmin.local
 {0}\tmailcatcher.local""".format(config["docker"]["ip"])
             os.system("echo \"{0}\" | sudo tee -a {1} > /dev/null".format(hosts_list, config["system"]["hosts"]))
@@ -149,6 +150,7 @@ def dockerSetup():
         if not os.path.exists(config["system"]["www_dir"]):
             os.system("sudo mkdir -p {0}".format(config["system"]["www_dir"]))
             os.system("sudo mkdir -p {0}/html".format(config["system"]["www_dir"]))
+            os.system("sudo chmod 0777 {0}/html".format(config["system"]["www_dir"]))
             os.system("sudo mkdir -p {0}/log".format(config["system"]["www_dir"]))
             os.system("sudo mkdir -p {0}/log/nginx".format(config["system"]["www_dir"]))
             os.system("sudo mkdir -p {0}/log/php".format(config["system"]["www_dir"]))
