@@ -3,10 +3,14 @@ import os
 import sys
 import subprocess
 
+def scriptPrint(string):
+    if config["verbose"] == 1:
+        print(string)
+
 def checkRequirements():
     missing_requirements = []
 
-    for packet, command in REQUIREMENTS.items():
+    for packet, command in config["requirements"].items():
         (code, res) = subprocess.getstatusoutput(command)
 
         if code > 0:
@@ -14,20 +18,47 @@ def checkRequirements():
 
     if len(missing_requirements) > 0:
         for packet in missing_requirements:
-            print("\33[1;31;40m{0} is required. Please install {0}.".format(packet))
+            scriptPrint("\33[1;31;40m{0} is required. Please install {0}.".format(packet))
 
         os.system("tput sgr0")
         sys.exit(1)
 
-def checkoutSystemBranch():
-    if sys.platform == "darwin":
-        (code, res) = subprocess.getstatusoutput("git rev-parse --abbrev-ref HEAD")
+# Parse script arguments
+def parseArguments():
+    if len(sys.argv) > 1:
+        i = 0
+        for arg in sys.argv:
+            # Is silent
+            if arg == "-s":
+                config["verbose"] = 0
 
-        if res != "osx/php+mysql":
-            os.system("git --git-dir={0}/.git checkout osx/php+mysql -q".format(DOCKER_DIR))
+            if any(arg == cmd for cmd in config["known_commands"]):
+                config["command"] = arg
+                config["args"] = sys.argv[i+1:len(sys.argv)]
+
+            i += 1
+
+# Gather system specific data
+def gatherFacts():
+    if config["platform"] == SYS_MACOS:
+        config["system"]["hosts"] = "/etc/hosts"
+        config["system"]["autocomplete_dir"] = "/usr/local/etc/bash_completion.d"
+        config["system"]["executable_dir"] = "/usr/local/bin"
+        config["system"]["src_dir"] = "/usr/local/lib/dev-environment"
+        config["system"]["bash_profile"] = "/etc/profile.d/dock.sh"
+        config["system"]["www_dir"] = "/var/www"
+        config["system"]["requirements"]["docker-sync"] = "docker-sync --version"
+
+    elif config["platform"] == SYS_LINUX:
+        config["system"]["hosts"] = "/etc/hosts"
+        config["system"]["autocomplete_dir"] = "/etc/bash_completion.d"
+        config["system"]["executable_dir"] = "/usr/local/bin"
+        config["system"]["src_dir"] = "/usr/local/src/dev-environment"
+        config["system"]["bash_profile"] = "/etc/profile.d/dock.sh"
+        config["system"]["www_dir"] = "/var/www"
 
 def printHelp():
-    print("""
+    scriptPrint("""
 List of available commands:
 
 dock help
@@ -37,7 +68,6 @@ dock run
 dock start
 dock stop
 dock restart
-dock sync
 dock clean
 dock purge
 dock list [OPTIONS]
@@ -48,7 +78,7 @@ Run "dock help all" to get a detailed explanation on functions
     """);
 
 def printDetailedHelp():
-    print("""
+    scriptPrint("""
 Available commands explained:
 
 dock help
@@ -72,9 +102,6 @@ dock stop
 dock restart
     Restart containers
 
-dock sync
-    Sync the docker-sync shared folders (OSX only)
-
 dock clean
     Clean all compiled containers and their networks
 
@@ -92,71 +119,75 @@ dock logs [CONTAINER IDENTIFIER]
     """);
 
 def dockerSetup():
-    print("You need to super user permissions in order to execute this command")
-
     try:
         # Set up hosts file
-        hosts = open(HOSTS_FILE, "r");
+        hosts = open(config["system"]["hosts"], "r");
         if "dev.local" not in hosts.read():
-            HOSTS_LIST = """
-127.0.0.1\tlocalunixsocket
-{0}\tdev.local
+            hosts_list = """
 {0}\tdev5.local
+{0}\tdev70.local
+{0}\tdev.local
+{0}\tdev71.local
 {0}\tphpmyadmin.local
-{0}\tmailcatcher.local""".format(DOCKER_MACHINE_IP)
-            os.system("echo \"{0}\" | sudo tee -a /etc/hosts > /dev/null".format(HOSTS_LIST))
+{0}\tmailcatcher.local""".format(config["docker"]["ip"])
+            os.system("echo \"{0}\" | sudo tee -a {1} > /dev/null".format(hosts_list, config["system"]["hosts"]))
 
         # Set up this script as system executable
-        if not os.path.exists("~/.dev-environment"):
-            os.system("mkdir -p ~/.dev-environment")
-            os.system("cp {0}/dock.py ~/.dev-environment".format(DOCKER_DIR))
-            os.system("sudo ln -s {0}/.dev-environment/dock.py {1}/dock".format(HOME, EXECUTABLE_DIR))
+        if not os.path.exists(config["system"]["src_dir"]):
+            os.system("sudo mkdir {0}".format(config["system"]["src_dir"]))
+            os.system("sudo cp -R {0}/* {1}".format(config["script_dir"], config["system"]["src_dir"]))
+            os.system("sudo ln -s {0}/dock.py {1}/dock".format(config["system"]["src_dir"], config["system"]["executable_dir"]))
 
         # Set up autocomplete script
-        if not os.path.exists("{0}/dock".format(AUTOCOMPLETE_DIR)):
-            os.system("cp {0}/dock_autocomplete ~/.dev-environment".format(DOCKER_DIR))
+        if not os.path.exists("{0}/dock".format(config["system"]["autocomplete_dir"])):
             if sys.platform == "darwin":
-                os.system("ln -s {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
+                os.system("ln -s {0}/dock_autocomplete {1}/dock".format(config["system"]["src_dir"], config["system"]["autocomplete_dir"]))
             else:
-                os.system("sudo cp {0}/.dev-environment/dock_autocomplete {1}/dock".format(HOME, AUTOCOMPLETE_DIR))
+                os.system("sudo cp {0}/dock_autocomplete {1}/dock".format(config["system"]["src_dir"], config["system"]["autocomplete_dir"]))
 
         # Create directories for web server
-        if not os.path.exists("{0}/www".format(HOME)):
-            os.system("mkdir -p {0}/www".format(HOME))
-            os.system("mkdir -p {0}/www/html".format(HOME))
-            os.system("mkdir -p {0}/www/log".format(HOME))
-            os.system("mkdir -p {0}/www/log/nginx".format(HOME))
-            os.system("mkdir -p {0}/www/log/php".format(HOME))
-            # os.system("mkdir -p {0}/www/log/mysql5".format(HOME))
+        if not os.path.exists(config["system"]["www_dir"]):
+            os.system("sudo mkdir -p {0}".format(config["system"]["www_dir"]))
+            os.system("sudo mkdir -p {0}/html".format(config["system"]["www_dir"]))
+            os.system("sudo mkdir -p {0}/log".format(config["system"]["www_dir"]))
+            os.system("sudo mkdir -p {0}/log/nginx".format(config["system"]["www_dir"]))
+            os.system("sudo mkdir -p {0}/log/php".format(config["system"]["www_dir"]))
 
         # Add repository dir to as environment variable for future use
-        bash = open(BASH_PROFILE, "r+");
-        if "DOCKER_DEV_ENVIRONMENT_DIR" not in bash.read():
-            bash.write("\nexport DOCKER_DEV_ENVIRONMENT_DIR={0}".format(SCRIPT_DIR));
-            os.system("source ~/.bash_profile")
+        if not os.path.exists(config["system"]["bash_profile"]):
+            os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee -a {1} > /dev/null"
+                .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
+            os.system("source {0}".format(config["system"]["bash_profile"]))
 
     except IOError as e:
         # You need to have super user permissions to set up hosts settings
-        print("You need to super user permissions in order to execute this command")
+        scriptPrint("You need to super user permissions in order to execute this command")
         sys.exit(1)
 
 def dockerBuild():
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync start".format(DOCKER_DIR))
-
-    os.system("docker-compose -f {0}/docker-compose.yml build".format(DOCKER_DIR))
+    os.system("docker-compose -f {0}/docker-compose.yml build".format(config["script_dir"]))
 
 def dockerStart():
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync start".format(DOCKER_DIR))
-
-    os.system("docker-compose -f {0}/docker-compose.yml up -d".format(DOCKER_DIR))
+    os.system("docker-compose -f {0}/docker-compose.yml up -d".format(config["script_dir"]))
 
 def dockerStop():
-    os.system("docker-compose -f {0}/docker-compose.yml stop".format(DOCKER_DIR))
+    os.system("docker-compose -f {0}/docker-compose.yml stop".format(config["script_dir"]))
 
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync stop".format(DOCKER_DIR))
+def dockerClean():
+    os.system("docker stop $(docker ps -aq)")
+    os.system("docker rm --force $(docker ps -aq)")
+    os.system("docker container prune --force")
+    os.system("docker network prune --force")
+
+def dockerPurge():
+    os.system("docker stop $(docker ps -aq)")
+    os.system("docker rm --force $(docker ps -aq)")
+    os.system("docker rmi --force $(docker images -aq)")
+    os.system("docker network rm $(docker network ls -q)")
+    os.system("docker volume prune --force")
+
+def dockerList(args = ""):
+    os.system("docker ps {0}".format(args))
 
 def dockerBash(container):
     shells = ["/bin/bash", "/bin/sh"]
@@ -168,62 +199,43 @@ def dockerBash(container):
         except:
             pass
 
-# Search for available docker machines named like default or dev
-def getDockerMachinesList():
-    mlist = []
-    cmd_output = os.popen("docker-machine ls --filter name=de --format \"{{.Name}}\"")
+def dockerLogs(container):
+    os.system("docker logs {0}".format(container))
 
-    for line in cmd_output.readlines():
-        mlist.append(line.strip())
+#### Init application [START] ####
 
-    return mlist
+SYS_MACOS = "darwin";
+SYS_LINUX = "linux";
 
-def getDockerMachineIpByName(name):
-    return os.popen("docker-machine ip {0}".format(name)).read().strip()
-
-#### [START] Init application variables ####
-
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-HOME = os.environ["HOME"]
-
-REQUIREMENTS = {
-    "git": "git --version",
-    "docker": "docker --version",
-    "docker-compose": "docker-compose --version",
+config = {
+    "platform": sys.platform,
+    "script_dir": os.path.dirname(os.path.realpath(__file__)),
+    "requirements": {
+        "git": "git --version",
+        "docker": "docker --version",
+        "docker-compose": "docker-compose --version",
+    },
+    "verbose": 1,
+    "known_commands": (
+        "help", "setup", "build", "run", "start", "stop", "restart", "sync", "clean",
+        "purge", "list", "bash", "logs",
+    ),
+    "command": "help",
+    "args": [],
+    "docker": {
+        "ip": "127.0.0.1",
+    },
+    "system": {},
 }
 
 if "DOCKER_DEV_ENVIRONMENT_DIR" in os.environ.keys():
-    DOCKER_DIR = os.environ["DOCKER_DEV_ENVIRONMENT_DIR"]
-else:
-    DOCKER_DIR = SCRIPT_DIR
+    config["script_dir"] = os.environ["DOCKER_DEV_ENVIRONMENT_DIR"]
 
-machines_list = getDockerMachinesList()
-DOCKER_MACHINE_IP = "127.0.0.1"
-
-# Set system specific variables, required in the SCRIPT_DIR
-if sys.platform == "darwin":
-    HOSTS_FILE = "/etc/hosts"
-    AUTOCOMPLETE_DIR = "/usr/local/etc/bash_completion.d"
-    EXECUTABLE_DIR = "/usr/local/bin"
-    BASH_PROFILE = "{0}/.bash_profile".format(HOME)
-    REQUIREMENTS["docker-sync"] = "docker-sync --version"
-
-    if len(machines_list) > 0:
-        DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
-
-elif sys.platform == "linux":
-    HOSTS_FILE = "/etc/hosts"
-    AUTOCOMPLETE_DIR = "/etc/bash_completion.d"
-    EXECUTABLE_DIR = "/usr/local/bin"
-    BASH_PROFILE = "{0}/.profile".format(HOME)
-
-    if len(machines_list) > 0:
-        DOCKER_MACHINE_IP = getDockerMachineIpByName(machines_list[0])
-
-#### [END] Init application variables ####
-
+gatherFacts()
 checkRequirements()
-checkoutSystemBranch()
+parseArguments()
+
+#### Init application [END] ####
 
 if len(sys.argv) > 1:
     command = sys.argv[1]
@@ -256,46 +268,28 @@ elif command == "restart":
     dockerStop()
     dockerStart()
 
-elif command == "sync":
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync sync".format(DOCKER_DIR))
-
 elif command == "clean":
-    os.system("docker stop $(docker ps -aq)")
-    os.system("docker rm --force $(docker ps -aq)")
-    os.system("docker container prune --force")
-    os.system("docker network prune --force")
-
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync clean".format(DOCKER_DIR))
+    dockerClean()
 
 elif command == "purge":
-    os.system("docker stop $(docker ps -aq)")
-    os.system("docker rm --force $(docker ps -aq)")
-    os.system("docker rmi --force $(docker images -aq)")
-    os.system("docker network rm $(docker network ls -q)")
-    os.system("docker volume prune --force")
-
-    if sys.platform == "darwin":
-        os.system("cd {0} && docker-sync clean".format(DOCKER_DIR))
-
-    # Fix for mysql5 isses with access rights on container purge
-    os.system("rm -rf {0}/www/log/mysql5/*".format(HOME))
+    dockerPurge()
 
 elif command == "list":
     if len(sys.argv) > 2:
-        os.system("docker ps {0}".format(sys.argv[2]))
+        dockerList(sys.argv[2])
     else:
-        os.system("docker ps")
+        dockerList()
 
 elif command == "bash":
     if len(sys.argv) == 3:
         dockerBash(sys.argv[2])
     else:
-        print("Please provide container name or ID")
+        scriptPrint("Please provide container name or ID")
+        sys.exit(1)
 
 elif command == "logs":
     if len(sys.argv) == 3:
-        os.system("docker logs {0}".format(sys.argv[2]))
+        dockerLogs(sys.argv[2])
     else:
-        print("Please provide container name or ID")
+        scriptPrint("Please provide container name or ID")
+        sys.exit(1)
