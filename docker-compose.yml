@@ -1,23 +1,43 @@
 version: "3.2"
 
 services:
+  sshd:
+    build:
+      context: ./images/sshd
+    image: webdev-sshd:latest
+    container_name: sshd
+    ports:
+      - "22:22"
+    volumes:
+      - type: www
+        source: www
+        target: /var/www/
+        volume:
+          nocopy: true
+    networks:
+      - backend
+
   webserver:
     build:
       context: ./images/webserver
+    cap_add:
+      - SYS_PTRACE
     image: webdev-webserver:latest
     container_name: webserver
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - type: tmpfs
+      - type: volume
         source: sock
         target: /var/run/sock/
         volume:
           nocopy: true
-      - type: bind
-        source: /var/www/
+      - type: www
+        source: www
         target: /var/www/
+        volume:
+          nocopy: true
     networks:
       - backend
 
@@ -29,7 +49,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
-      - type: tmpfs
+      - type: volume
         source: sock
         target: /var/run/sock/
         volume:
@@ -48,7 +68,7 @@ services:
     environment:
       - PMA_ABSOLUTE_URI=http://phpmyadmin.local/
     volumes:
-      - type: tmpfs
+      - type: volume
         source: sock
         target: /var/run/sock/
         volume:
@@ -79,3 +99,4 @@ networks:
 volumes:
   sock:
   mysql5:
+  www:
