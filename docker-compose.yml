@@ -66,30 +66,6 @@ services:
     networks:
       - backend
 
-  # webserver:
-  #   build:
-  #     context: ./images/webserver
-  #   cap_add:
-  #     - SYS_PTRACE
-  #   image: webdev-webserver:latest
-  #   container_name: webserver
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - type: volume
-  #       source: sock
-  #       target: /var/run/sock/
-  #       volume:
-  #         nocopy: true
-  #     - type: www
-  #       source: www
-  #       target: /var/www/
-  #       volume:
-  #         nocopy: true
-  #   networks:
-  #     - backend
-
   mysql5:
     build:
       context: ./images/mysql5
