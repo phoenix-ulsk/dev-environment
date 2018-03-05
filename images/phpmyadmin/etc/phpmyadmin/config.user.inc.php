@@ -3,7 +3,8 @@
 $cfg['Servers'] = [
     1 => [
         'auth_type' => 'config',
-        'socket'=> '/var/run/sock/mysql5.sock',
+        'host'=> 'mysql5',
+        'port'=> '3306',
         'verbose' => 'MySQL 5 Server',
         'user'=> 'root',
         'password'=> 'root',
