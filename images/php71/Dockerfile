@@ -36,7 +36,10 @@ RUN apk --no-cache add ssmtp \
     cyrus-sasl-dev \
     pcre-dev \
     ${PHPIZE_DEPS} \
-  && rm -rf /var/cache/apk/* /tmp/*
+  && rm -rf /var/cache/apk/* /tmp/* \
+  && curl -sS https://getcomposer.org/installer -o composer-setup.php \
+  && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+  && rm composer-setup.php
 
 # Config local hosts file
 RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null \

@@ -111,14 +111,14 @@ services:
       - PMA_ABSOLUTE_URI=http://phpmyadmin.local/
     networks:
       - backend
-  #
-  # mailcatcher:
-  #   build:
-  #     context: ./images/mailcatcher
-  #   image: webdev-mailcatcher:latest
-  #   container_name: mailcatcher
-  #   networks:
-  #     - backend
+
+  mailcatcher:
+    build:
+      context: ./images/mailcatcher
+    image: webdev-mailcatcher:latest
+    container_name: mailcatcher
+    networks:
+      - backend
 
   memcached:
     build:
