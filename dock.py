@@ -47,7 +47,6 @@ def gatherFacts():
         config["system"]["src_dir"] = "/usr/local/lib/dev-environment"
         config["system"]["bash_profile"] = "/etc/profile.d/dock.sh"
         config["system"]["www_dir"] = "/var/www"
-        config["system"]["requirements"]["docker-sync"] = "docker-sync --version"
 
     elif config["platform"] == SYS_LINUX:
         config["system"]["hosts"] = "/etc/hosts"
@@ -137,7 +136,11 @@ def dockerSetup():
         if not os.path.exists(config["system"]["src_dir"]):
             os.system("sudo mkdir {0}".format(config["system"]["src_dir"]))
             os.system("sudo cp -R {0}/* {1}".format(config["script_dir"], config["system"]["src_dir"]))
-            os.system("sudo ln -s {0}/dock.py {1}/dock".format(config["system"]["src_dir"], config["system"]["executable_dir"]))
+
+            if sys.platform == "darwin":
+                os.system("ln -s {0}/dock.py {1}/dock".format(config["system"]["src_dir"], config["system"]["executable_dir"]))
+            else:
+                os.system("sudo ln -s {0}/dock.py {1}/dock".format(config["system"]["src_dir"], config["system"]["executable_dir"]))
 
         # Set up autocomplete script
         if not os.path.exists("{0}/dock".format(config["system"]["autocomplete_dir"])):
@@ -157,6 +160,9 @@ def dockerSetup():
 
         # Add repository dir to as environment variable for future use
         if not os.path.exists(config["system"]["bash_profile"]):
+            if config["platform"] == SYS_MACOS:
+                os.system("sudo mkdir -p /etc/profile.d")
+
             os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee {1} > /dev/null"
                 .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
             os.system("export DOCKER_DEV_ENVIRONMENT_DIR={0}".format(config["system"]["src_dir"]))
@@ -196,9 +202,10 @@ def dockerBash(container):
 
     for shell in shells:
         try:
-            os.system("docker exec -it {0} {1}".format(container, shell))
-            break
-        except:
+            res = subprocess.call("docker exec -it {0} {1}".format(container, shell), shell=True)
+            if (res == 0):
+                break
+        except OSError:
             pass
 
 def dockerLogs(container):
