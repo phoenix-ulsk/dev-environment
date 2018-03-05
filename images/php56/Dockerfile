@@ -6,7 +6,8 @@ WORKDIR /var/www/html/
 
 # Install aditional libs
 RUN apk --no-cache update
-RUN apk --no-cache add ssmtp \
+RUN apk --no-cache add mysql-client \
+    ssmtp \
     freetype \
     libpng \
     libjpeg-turbo \
@@ -42,6 +43,25 @@ RUN apk --no-cache add ssmtp \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
   && rm composer-setup.php
 
+# Configure extensions
+RUN echo -e "opcache.enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.revalidate_freq=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.revalidate_path=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.max_accelerated_files=15000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.memory_consumption=128" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.interned_strings_buffer=16" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.use_cwd=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "xdebug.remote_enable = 1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.remote_connect_back = 1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.remote_port = 9056" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.remote_handler = \"dbgp\"" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.profiler_enable = 0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.profiler_enable_trigger = 1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.max_nesting_level  = 500" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null
+
 # Config local hosts file
 RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null \
   && echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null
+
+EXPOSE 9000 9056
