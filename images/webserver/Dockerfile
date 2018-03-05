@@ -92,6 +92,7 @@ COPY etc/nginx /etc/nginx
 
 # Add nginx to www-data grout
 RUN adduser nginx www-data
+RUN chown www-data:www-data /var/www/*
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
@@ -100,9 +101,10 @@ RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
 
 # Config local hosts file
 RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null \
+  && echo -e "127.0.0.1\tdev.local" | tee -a /etc/hosts > /dev/null \
   && echo -e "127.0.0.1\tdev5.local" | tee -a /etc/hosts > /dev/null \
   && echo -e "127.0.0.1\tdev70.local" | tee -a /etc/hosts > /dev/null \
-  && echo -e "127.0.0.1\tdev.local" | tee -a /etc/hosts > /dev/null \
+  && echo -e "127.0.0.1\tdev71.local" | tee -a /etc/hosts > /dev/null \
   && echo -e "127.0.0.1\tdev72.local" | tee -a /etc/hosts > /dev/null
 
 RUN mkdir /etc/ssl/self_signed/ \
