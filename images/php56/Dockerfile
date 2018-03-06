@@ -43,6 +43,15 @@ RUN apk --no-cache add mysql-client \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
   && rm composer-setup.php
 
+# Create www volume structure (because we do not know what container is the first to run)
+RUN mkdir -p /var/www/html/ \
+  && mkdir -p /var/www/log/ \
+  && mkdir -p /var/www/log/php/ \
+  && mkdir -p /var/www/log/nginx/ \
+  && chown www-data:www-data /var/www/html/ \
+  && chown www-data:www-data /var/www/log/php/
+COPY var/www/html/phpinfo.php /var/www/html/phpinfo.php
+
 # Configure SSMTP and PHP
 COPY usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
 RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /dev/null && \

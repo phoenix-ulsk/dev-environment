@@ -17,8 +17,6 @@ services:
       - type: volume
         source: www
         target: /var/www/
-        volume:
-          nocopy: true
     networks:
       - backend
 
@@ -48,8 +46,6 @@ services:
       - type: volume
         source: www
         target: /var/www/
-        volume:
-          nocopy: true
     networks:
       - backend
 
@@ -64,8 +60,6 @@ services:
       - type: volume
         source: www
         target: /var/www/
-        volume:
-          nocopy: true
     networks:
       - backend
 
