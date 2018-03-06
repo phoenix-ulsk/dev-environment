@@ -43,8 +43,15 @@ RUN apk --no-cache add mysql-client \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
   && rm composer-setup.php
 
-# Configure extensions
-RUN echo -e "opcache.enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+# Configure SSMTP and PHP
+COPY usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
+RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /dev/null && \
+  sed -i 's/#hostname="localhost"/hostname=dev.local/' /etc/ssmtp/ssmtp.conf > /dev/null && \
+  echo -e "FromLineOverride=YES" | tee -a /etc/ssmtp/ssmtp.conf > /dev/null && \
+  sed -i 's/;error_log = log\/php-fpm.log/error_log = \/var\/www\/log\/php\/56-fpm.log/' /usr/local/etc/php-fpm.conf > /dev/null && \
+  sed -i 's/;slowlog = log\/\$pool.log.slow/slowlog = \/var\/www\/log\/php\/56-slow.log/' /usr/local/etc/php-fpm.d/www.conf > /dev/null && \
+  sed -i 's/;request_slowlog_timeout = 0/request_slowlog_timeout = 3/' /usr/local/etc/php-fpm.d/www.conf > /dev/null && \
+  echo -e "opcache.enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.revalidate_freq=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.revalidate_path=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.max_accelerated_files=15000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
@@ -63,5 +70,7 @@ RUN echo -e "opcache.enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext
 # Config local hosts file
 RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null \
   && echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null
+
+USER www-data
 
 EXPOSE 9000 9056
