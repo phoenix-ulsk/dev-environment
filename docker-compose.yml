@@ -9,7 +9,12 @@ services:
     ports:
       - "22:22"
     volumes:
-      - type: www
+      - type: bind
+        source: $HOME/share/
+        target: /home/www-data/share/
+        volume:
+          nocopy: true
+      - type: volume
         source: www
         target: /var/www/
         volume:
@@ -26,11 +31,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - type: www
+      - type: volume
         source: www
         target: /var/www/
-        volume:
-          nocopy: true
     networks:
       - backend
 
@@ -42,7 +45,7 @@ services:
     ports:
       - "9056:9056"
     volumes:
-      - type: www
+      - type: volume
         source: www
         target: /var/www/
         volume:
@@ -58,7 +61,7 @@ services:
     ports:
       - "9071:9071"
     volumes:
-      - type: www
+      - type: volume
         source: www
         target: /var/www/
         volume:
@@ -77,8 +80,6 @@ services:
       - type: volume
         source: mysql5
         target: /var/lib/mysql/
-        volume:
-          nocopy: true
     networks:
       - backend
 

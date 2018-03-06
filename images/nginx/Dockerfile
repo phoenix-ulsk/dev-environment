@@ -19,6 +19,9 @@ RUN mkdir -p /var/www/html/ \
   && mkdir -p /var/www/log/php/ \
   && mkdir -p /var/www/log/nginx/ \
   && chown www-data:www-data /var/www/html/
+COPY var/www/html/phpinfo.php /var/www/html/phpinfo.php
+
+VOLUME /var/www
 
 # Configure nginx
 COPY etc/nginx /etc/nginx
