@@ -25,12 +25,12 @@ RUN mkdir -p /var/www/html/ \
   && chown www-data:www-data /var/www/log/php/
 COPY var/www/html/phpinfo.php /var/www/html/phpinfo.php
 
-# Add SSH key to www-data user
-COPY home/www-data /home/www-data
-RUN ln -s /var/www/log/ /home/www-data/log \
-  && ln -s /var/www/html/ /home/www-data/html \
-  && chown -R www-data:www-data /home/www-data \
-  && chmod 0644 /home/www-data/.ssh/authorized_keys
+# Configure www-data as global SSH key and config www-data user home dir
+COPY etc/ssh/www-data.pub /etc/ssh/www-data.pub
+RUN sed -i 's/AuthorizedKeysFile\t.ssh\/authorized_keys/AuthorizedKeysFile\t.ssh\/authorized_keys \/etc\/ssh\/www-data.pub/' /etc/ssh/sshd_config > /dev/null && \
+  ln -s /var/www/log/ /home/www-data/log && \
+  ln -s /var/www/html/ /home/www-data/html && \
+  chown -R www-data:www-data /home/www-data
 
 EXPOSE 22
 
