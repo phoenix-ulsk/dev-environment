@@ -43,7 +43,8 @@ RUN apk --no-cache update && \
   php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   rm composer-setup.php
 
-# Create www volume structure (because we do not know what container is the first to run)
+# Create www volume structure, because we do not know what container is the first to run and seed data to volume.
+# As a workaround for docker-compose v3 volumes management bug/feature: https://github.com/docker/compose/issues/4379
 RUN mkdir -p /var/www/html/ && \
   mkdir -p /var/www/log/ && \
   mkdir -p /var/www/log/php/ && \

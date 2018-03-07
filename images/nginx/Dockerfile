@@ -13,7 +13,8 @@ RUN apk --no-cache update && \
   apk --no-cache del shadow && \
   rm -rf /var/cache/apk/* /tmp/*
 
-# Create www volume structure (because we do not know what container is the first to run)
+# Create www volume structure, because we do not know what container is the first to run and seed data to volume.
+# As a workaround for docker-compose v3 volumes management bug/feature: https://github.com/docker/compose/issues/4379
 RUN mkdir -p /var/www/html/ && \
   mkdir -p /var/www/log/ && \
   mkdir -p /var/www/log/php/ && \

@@ -10,6 +10,11 @@ services:
       - "22:22"
     volumes:
       - type: bind
+        source: $HOME/.ssh/
+        target: /home/www-data/.ssh/
+        volume:
+          nocopy: true
+      - type: bind
         source: $HOME/share/
         target: /home/www-data/share/
         volume:
