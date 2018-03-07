@@ -77,10 +77,6 @@ RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /d
   echo -e "xdebug.profiler_enable_trigger = 1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.max_nesting_level  = 500" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null
 
-# Config local hosts file
-RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null && \
-  echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null
-
 USER www-data
 
 EXPOSE 9000 9056

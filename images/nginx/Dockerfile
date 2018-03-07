@@ -26,12 +26,6 @@ COPY var/www/html/phpinfo.php /var/www/html/phpinfo.php
 # Configure nginx
 COPY etc/nginx /etc/nginx
 
-# Config local hosts file
-RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null && \
-  echo -e "127.0.0.1\tdev.local" | tee -a /etc/hosts > /dev/null && \
-  echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null && \
-  echo -e "127.0.0.1\tdev71.local" | tee -a /etc/hosts > /dev/null
-
 # Create self signed certificate for HTTS
 RUN mkdir /etc/ssl/self_signed/ && \
   openssl req \

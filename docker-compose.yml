@@ -38,7 +38,11 @@ services:
         source: www
         target: /var/www/
     networks:
-      - backend
+      backend:
+        aliases:
+          - dev.local
+          - dev56.local
+          - dev71.local
 
   php56:
     build:
