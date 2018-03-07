@@ -5,6 +5,7 @@ WORKDIR /var/www/html/
 # Install packages and create www-data user
 RUN apk --no-cache update && \
   apk --no-cache add openssh-server \
+    openssh-sftp-server \
     openssh-client \
     mysql-client \
     vim \
