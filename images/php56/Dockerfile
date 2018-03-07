@@ -5,8 +5,8 @@ ENV ROOT_PASSWORD=root
 WORKDIR /var/www/html/
 
 # Install aditional libs
-RUN apk --no-cache update
-RUN apk --no-cache add mysql-client \
+RUN apk --no-cache update && \
+  apk --no-cache add mysql-client \
     ssmtp \
     freetype \
     libpng \
@@ -19,37 +19,37 @@ RUN apk --no-cache add mysql-client \
     libmemcached-dev \
     cyrus-sasl-dev \
     pcre-dev \
-    ${PHPIZE_DEPS} \
-  && pecl install memcached-2.2.0 xdebug-2.5.5 \
-  && docker-php-ext-configure gd \
+    ${PHPIZE_DEPS} && \
+  pecl install memcached-2.2.0 xdebug-2.5.5 && \
+  docker-php-ext-configure gd \
     --with-freetype-dir=/usr/include/ \
     --with-png-dir=/usr/include/ \
-    --with-jpeg-dir=/usr/include/ \
-  && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
-  && docker-php-ext-install -j${NPROC} gd \
-    pdo_mysql \
-  && docker-php-ext-enable memcached \
+    --with-jpeg-dir=/usr/include/ && \
+  NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
+  docker-php-ext-install -j${NPROC} gd \
+    pdo_mysql && \
+  docker-php-ext-enable memcached \
     xdebug \
-    opcache \
-  && apk --no-cache del freetype-dev \
+    opcache && \
+  apk --no-cache del freetype-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     libmemcached-dev \
     cyrus-sasl-dev \
     pcre-dev \
-    ${PHPIZE_DEPS} \
-  && rm -rf /var/cache/apk/* /tmp/* \
-  && curl -sS https://getcomposer.org/installer -o composer-setup.php \
-  && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-  && rm composer-setup.php
+    ${PHPIZE_DEPS} && \
+  rm -rf /var/cache/apk/* /tmp/* && \
+  curl -sS https://getcomposer.org/installer -o composer-setup.php && \
+  php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+  rm composer-setup.php
 
 # Create www volume structure (because we do not know what container is the first to run)
-RUN mkdir -p /var/www/html/ \
-  && mkdir -p /var/www/log/ \
-  && mkdir -p /var/www/log/php/ \
-  && mkdir -p /var/www/log/nginx/ \
-  && chown www-data:www-data /var/www/html/ \
-  && chown www-data:www-data /var/www/log/php/
+RUN mkdir -p /var/www/html/ && \
+  mkdir -p /var/www/log/ && \
+  mkdir -p /var/www/log/php/ && \
+  mkdir -p /var/www/log/nginx/ && \
+  chown www-data:www-data /var/www/html/ && \
+  chown www-data:www-data /var/www/log/php/
 COPY var/www/html/phpinfo.php /var/www/html/phpinfo.php
 
 # Configure SSMTP and PHP
@@ -77,8 +77,8 @@ RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /d
   echo -e "xdebug.max_nesting_level  = 500" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null
 
 # Config local hosts file
-RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null \
-  && echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null
+RUN echo -e "# Local webserver hosts" | tee -a /etc/hosts > /dev/null && \
+  echo -e "127.0.0.1\tdev56.local" | tee -a /etc/hosts > /dev/null
 
 USER www-data
 
