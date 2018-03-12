@@ -49,8 +49,6 @@ services:
       context: ./images/php56
     image: webdev-php56:latest
     container_name: php56
-    ports:
-      - "9056:9056"
     volumes:
       - type: volume
         source: www
@@ -63,8 +61,6 @@ services:
       context: ./images/php71
     image: webdev-php71:latest
     container_name: php71
-    ports:
-      - "9071:9071"
     volumes:
       - type: volume
         source: www
