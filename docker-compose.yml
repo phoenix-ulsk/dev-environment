@@ -9,35 +9,62 @@ services:
     ports:
       - "22:22"
     volumes:
-      - type: www
-        source: www
-        target: /var/www/
+      - type: bind
+        source: $HOME/.ssh/
+        target: /home/www-data/.ssh/
         volume:
           nocopy: true
+      - type: bind
+        source: $HOME/share/
+        target: /home/www-data/share/
+        volume:
+          nocopy: true
+      - type: volume
+        source: www
+        target: /var/www/
     networks:
       - backend
 
-  webserver:
+  nginx:
     build:
-      context: ./images/webserver
-    cap_add:
-      - SYS_PTRACE
-    image: webdev-webserver:latest
-    container_name: webserver
+      context: ./images/nginx
+    image: webdev-nginx:latest
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - type: volume
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
-      - type: www
         source: www
         target: /var/www/
-        volume:
-          nocopy: true
+    networks:
+      backend:
+        aliases:
+          - dev.local
+          - dev56.local
+          - dev71.local
+
+  php56:
+    build:
+      context: ./images/php56
+    image: webdev-php56:latest
+    container_name: php56
+    volumes:
+      - type: volume
+        source: www
+        target: /var/www/
+    networks:
+      - backend
+
+  php71:
+    build:
+      context: ./images/php71
+    image: webdev-php71:latest
+    container_name: php71
+    volumes:
+      - type: volume
+        source: www
+        target: /var/www/
     networks:
       - backend
 
@@ -50,15 +77,10 @@ services:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - type: volume
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
-      - type: volume
         source: mysql5
         target: /var/lib/mysql/
-        volume:
-          nocopy: true
+    networks:
+      - backend
 
   phpmyadmin:
     build:
@@ -67,12 +89,6 @@ services:
     container_name: phpmyadmin
     environment:
       - PMA_ABSOLUTE_URI=http://phpmyadmin.local/
-    volumes:
-      - type: volume
-        source: sock
-        target: /var/run/sock/
-        volume:
-          nocopy: true
     networks:
       - backend
 
@@ -97,6 +113,5 @@ networks:
     driver: bridge
 
 volumes:
-  sock:
   mysql5:
   www:

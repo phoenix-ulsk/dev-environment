@@ -131,6 +131,7 @@ def dockerSetup():
 {0}\tphpmyadmin.local
 {0}\tmailcatcher.local""".format(config["docker"]["ip"])
             os.system("echo \"{0}\" | sudo tee -a {1} > /dev/null".format(hosts_list, config["system"]["hosts"]))
+            os.system("sudo ifconfig lo0 alias 10.254.254.254")
 
         # Set up this script as system executable
         if not os.path.exists(config["system"]["src_dir"]):
