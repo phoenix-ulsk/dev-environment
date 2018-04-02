@@ -8,9 +8,8 @@ _dock()
     COMPREPLY=()
     _get_comp_words_by_ref cur prev
 
-    COMPREPLY=( $( compgen -W 'help setup build \
-        run start stop restart clean \
-        purge list bash logs' -- "$cur" ) )
+    COMPREPLY=( $( compgen -W 'help setup config build run start stop restart \
+        clean purge list bash logs' -- "$cur" ) )
 
     return 0
 } &&

@@ -7,6 +7,9 @@ def scriptPrint(string):
     if config["verbose"] == 1:
         print(string)
 
+def scriptWaitForInput(string):
+    return input(string)
+
 def checkRequirements():
     missing_requirements = []
 
@@ -56,12 +59,30 @@ def gatherFacts():
         config["system"]["bash_profile"] = "/etc/profile.d/dock.sh"
         config["system"]["www_dir"] = "/var/www"
 
+    # Console was not reloaded after setup so load ENV variables manually
+    if os.path.exists(config["system"]["bash_profile"]) and "DOCKER_DEV_ENVIRONMENT_DIR" not in os.environ.keys():
+        profile = open(config["system"]["bash_profile"], "r").read();
+        source_env = filter(
+            lambda elem: elem != None,
+            map(
+                lambda pair: [pair[0][6:].strip(), pair[1]] if pair[0][:6] == 'export' else None,
+                map(
+                    lambda row: row.strip().split('='),
+                    profile.split("\n")
+                )
+            )
+        )
+
+        for env in source_env:
+            os.putenv(env[0], env[1])
+
 def printHelp():
     scriptPrint("""
 List of available commands:
 
 dock help
 dock setup
+dock config
 dock build
 dock run
 dock start
@@ -85,6 +106,9 @@ dock help
 
 doxk setup
     Setup directories and ass this script as `dock` command to your system
+
+dock config
+    Configure environment
 
 dock build
     Build containers
@@ -131,7 +155,6 @@ def dockerSetup():
 {0}\tphpmyadmin.local
 {0}\tmailcatcher.local""".format(config["docker"]["ip"])
             os.system("echo \"{0}\" | sudo tee -a {1} > /dev/null".format(hosts_list, config["system"]["hosts"]))
-            os.system("sudo ifconfig lo0 alias 10.254.254.254")
 
         # Set up this script as system executable
         if not os.path.exists(config["system"]["src_dir"]):
@@ -163,6 +186,10 @@ def dockerSetup():
         if not os.path.exists(config["system"]["bash_profile"]):
             if config["platform"] == SYS_MACOS:
                 os.system("sudo mkdir -p /etc/profile.d")
+                os.system("echo \"\" | sudo tee -a /etc/profile > /dev/null")
+                os.system("echo \"for PROFILE_SCRIPT in $( ls /etc/profile.d/*.sh ); do\" | sudo tee -a /etc/profile > /dev/null")
+                os.system("echo \"    . \$PROFILE_SCRIPT\" | sudo tee -a /etc/profile > /dev/null")
+                os.system("echo \"done\" | sudo tee -a /etc/profile > /dev/null")
 
             os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee {1} > /dev/null"
                 .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
@@ -173,10 +200,47 @@ def dockerSetup():
         scriptPrint("You need to super user permissions in order to execute this command")
         sys.exit(1)
 
+def dockerConfig():
+    profile = open(config["system"]["bash_profile"], "r").read();
+
+    scriptPrint("Please provide information to configure git inside docker containers, \"sudo\" is required.")
+    os.system("sudo ls . > /dev/null")
+    try:
+        gitName = scriptWaitForInput("Name: ")
+        if "DOCKER_DEV_GIT_USER" not in profile:
+            os.system("echo \"export DOCKER_DEV_GIT_USER=\\\"{0}\\\"\" | sudo tee -a {1} > /dev/null"
+                .format(gitName, config["system"]["bash_profile"]))
+        else:
+            os.system("sudo sed -i '' 's/export DOCKER_DEV_GIT_USER=.*/export DOCKER_DEV_GIT_USER=\"{0}\"/' {1} > /dev/null"
+                .format(gitName, config["system"]["bash_profile"]))
+
+        os.system("export DOCKER_DEV_GIT_USER=\"{0}\"".format(gitName))
+        os.putenv("DOCKER_DEV_GIT_USER", gitName)
+
+        gitEmail = scriptWaitForInput("E-mail: ")
+        if "DOCKER_DEV_GIT_EMAIL" not in profile:
+            os.system("echo \"export DOCKER_DEV_GIT_EMAIL=\\\"{0}\\\"\" | sudo tee -a {1} > /dev/null"
+                .format(gitEmail, config["system"]["bash_profile"]))
+        else:
+            os.system("sudo sed -i '' 's/export DOCKER_DEV_GIT_EMAIL=.*/export DOCKER_DEV_GIT_EMAIL=\"{0}\"/' {1} > /dev/null"
+                .format(gitEmail, config["system"]["bash_profile"]))
+
+        os.system("export DOCKER_DEV_GIT_EMAIL=\"{0}\"".format(gitEmail))
+        os.putenv("DOCKER_DEV_GIT_EMAIL", gitEmail)
+
+        scriptPrint("Please restart your shell in order to refresh environment variables.")
+    except:
+        scriptPrint("")
+        sys.exit(1)
+
 def dockerBuild():
     os.system("docker-compose -f {0}/docker-compose.yml build".format(config["script_dir"]))
 
 def dockerStart():
+    # Rework: https://gist.github.com/brandt/c2f9e8277c90a1c284770c7ca7966226
+    if config["platform"] == SYS_MACOS:
+        os.system("sudo ifconfig lo0 alias 10.254.254.254")
+
     os.system("docker-compose -f {0}/docker-compose.yml up -d".format(config["script_dir"]))
 
 def dockerStop():
@@ -259,12 +323,18 @@ if command == "help":
         printHelp()
 
 elif command == "setup":
-    dockerSetup();
+    dockerSetup()
+    dockerConfig()
+
+elif command == "config":
+    dockerConfig()
 
 elif command == "build":
     dockerBuild()
 
 elif command == "run":
+    dockerStop()
+    dockerClean()
     dockerBuild()
     dockerStart()
 
