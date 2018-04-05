@@ -3,12 +3,15 @@ import os
 import sys
 import subprocess
 
+
 def scriptPrint(string):
     if config["verbose"] == 1:
         print(string)
 
+
 def scriptWaitForInput(string):
     return input(string)
+
 
 def checkRequirements():
     missing_requirements = []
@@ -26,6 +29,7 @@ def checkRequirements():
         os.system("tput sgr0")
         sys.exit(1)
 
+
 # Parse script arguments
 def parseArguments():
     if len(sys.argv) > 1:
@@ -37,9 +41,10 @@ def parseArguments():
 
             if any(arg == cmd for cmd in config["known_commands"]):
                 config["command"] = arg
-                config["args"] = sys.argv[i+1:len(sys.argv)]
+                config["args"] = sys.argv[i + 1:len(sys.argv)]
 
             i += 1
+
 
 # Gather system specific data
 def gatherFacts():
@@ -61,9 +66,9 @@ def gatherFacts():
 
     # Console was not reloaded after setup so load ENV variables manually
     if os.path.exists(config["system"]["bash_profile"]) and "DOCKER_DEV_ENVIRONMENT_DIR" not in os.environ.keys():
-        profile = open(config["system"]["bash_profile"], "r").read();
+        profile = open(config["system"]["bash_profile"], "r").read()
         source_env = filter(
-            lambda elem: elem != None,
+            lambda elem: elem is not None,
             map(
                 lambda pair: [pair[0][6:].strip(), pair[1]] if pair[0][:6] == 'export' else None,
                 map(
@@ -75,6 +80,7 @@ def gatherFacts():
 
         for env in source_env:
             os.putenv(env[0], env[1])
+
 
 def printHelp():
     scriptPrint("""
@@ -95,7 +101,8 @@ dock bash [CONTAINER IDENTIFIER]
 dock logs [CONTAINER IDENTIFIER]
 
 Run "dock help all" to get a detailed explanation on functions
-    """);
+    """)
+
 
 def printDetailedHelp():
     scriptPrint("""
@@ -139,12 +146,13 @@ dock bash [CONTAINER IDENTIFIER]
 
 dock logs [CONTAINER IDENTIFIER]
     Get container logs
-    """);
+    """)
+
 
 def dockerSetup():
     try:
         # Set up hosts file
-        hosts = open(config["system"]["hosts"], "r");
+        hosts = open(config["system"]["hosts"], "r")
         if "dev.local" not in hosts.read():
             hosts_list = """
 {0}\tdev.local
@@ -193,16 +201,17 @@ def dockerSetup():
                 os.system("echo \"done\" | sudo tee -a /etc/profile > /dev/null")
 
             os.system("echo \"export DOCKER_DEV_ENVIRONMENT_DIR={0}\" | sudo tee {1} > /dev/null"
-                .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
+                      .format(config["system"]["src_dir"], config["system"]["bash_profile"]))
             os.system("export DOCKER_DEV_ENVIRONMENT_DIR={0}".format(config["system"]["src_dir"]))
 
-    except IOError as e:
+    except IOError:
         # You need to have super user permissions to set up hosts settings
         scriptPrint("You need to super user permissions in order to execute this command")
         sys.exit(1)
 
+
 def dockerConfig():
-    profile = open(config["system"]["bash_profile"], "r").read();
+    profile = open(config["system"]["bash_profile"], "r").read()
 
     scriptPrint("Please provide information to configure git inside docker containers, \"sudo\" is required.")
     os.system("sudo ls . > /dev/null")
@@ -210,10 +219,10 @@ def dockerConfig():
         gitName = scriptWaitForInput("Name: ")
         if "DOCKER_DEV_GIT_USER" not in profile:
             os.system("echo \"export DOCKER_DEV_GIT_USER=\\\"{0}\\\"\" | sudo tee -a {1} > /dev/null"
-                .format(gitName, config["system"]["bash_profile"]))
+                      .format(gitName, config["system"]["bash_profile"]))
         else:
             os.system("sudo sed -i '' 's/export DOCKER_DEV_GIT_USER=.*/export DOCKER_DEV_GIT_USER=\"{0}\"/' {1} > /dev/null"
-                .format(gitName, config["system"]["bash_profile"]))
+                      .format(gitName, config["system"]["bash_profile"]))
 
         os.system("export DOCKER_DEV_GIT_USER=\"{0}\"".format(gitName))
         os.putenv("DOCKER_DEV_GIT_USER", gitName)
@@ -221,10 +230,10 @@ def dockerConfig():
         gitEmail = scriptWaitForInput("E-mail: ")
         if "DOCKER_DEV_GIT_EMAIL" not in profile:
             os.system("echo \"export DOCKER_DEV_GIT_EMAIL=\\\"{0}\\\"\" | sudo tee -a {1} > /dev/null"
-                .format(gitEmail, config["system"]["bash_profile"]))
+                      .format(gitEmail, config["system"]["bash_profile"]))
         else:
             os.system("sudo sed -i '' 's/export DOCKER_DEV_GIT_EMAIL=.*/export DOCKER_DEV_GIT_EMAIL=\"{0}\"/' {1} > /dev/null"
-                .format(gitEmail, config["system"]["bash_profile"]))
+                      .format(gitEmail, config["system"]["bash_profile"]))
 
         os.system("export DOCKER_DEV_GIT_EMAIL=\"{0}\"".format(gitEmail))
         os.putenv("DOCKER_DEV_GIT_EMAIL", gitEmail)
@@ -234,8 +243,10 @@ def dockerConfig():
         scriptPrint("")
         sys.exit(1)
 
+
 def dockerBuild():
     os.system("docker-compose -f {0}/docker-compose.yml build".format(config["script_dir"]))
+
 
 def dockerStart():
     # Rework: https://gist.github.com/brandt/c2f9e8277c90a1c284770c7ca7966226
@@ -244,14 +255,17 @@ def dockerStart():
 
     os.system("docker-compose -f {0}/docker-compose.yml up -d".format(config["script_dir"]))
 
+
 def dockerStop():
     os.system("docker-compose -f {0}/docker-compose.yml stop".format(config["script_dir"]))
+
 
 def dockerClean():
     os.system("docker stop $(docker ps -aq)")
     os.system("docker rm --force $(docker ps -aq)")
     os.system("docker container prune --force")
     os.system("docker network prune --force")
+
 
 def dockerPurge():
     os.system("docker stop $(docker ps -aq)")
@@ -260,8 +274,10 @@ def dockerPurge():
     os.system("docker network rm $(docker network ls -q)")
     os.system("docker volume prune --force")
 
-def dockerList(args = ""):
+
+def dockerList(args=""):
     os.system("docker ps {0}".format(args))
+
 
 def dockerBash(container):
     shells = ["/bin/bash", "/bin/sh"]
@@ -274,13 +290,15 @@ def dockerBash(container):
         except OSError:
             pass
 
+
 def dockerLogs(container):
     os.system("docker logs {0}".format(container))
 
-#### Init application [START] ####
 
-SYS_MACOS = "darwin";
-SYS_LINUX = "linux";
+# #### Init application [START] ####
+
+SYS_MACOS = "darwin"
+SYS_LINUX = "linux"
 
 config = {
     "platform": sys.platform,
@@ -310,7 +328,7 @@ gatherFacts()
 checkRequirements()
 parseArguments()
 
-#### Init application [END] ####
+# #### Init application [END] ####
 
 if len(sys.argv) > 1:
     command = sys.argv[1]
