@@ -60,6 +60,38 @@ RUN echo -e "#!/bin/bash" | tee -a /home/www-data/.profile > /dev/null && \
 
 USER root
 
+RUN apk --no-cache add php7 \
+  php7-common \
+  php7-calendar \
+  php7-ctype \
+  php7-curl \
+  php7-dom \
+  php7-fileinfo \
+  php7-ftp \
+  php7-gd \
+  php7-iconv \
+  php7-json \
+  php7-mbstring \
+  php7-mcrypt \
+  php7-memcached \
+  php7-mysqli \
+  php7-mysqlnd \
+  php7-openssl \
+  php7-pdo \
+  php7-pdo_mysql \
+  php7-pdo_sqlite \
+  php7-phar \
+  php7-posix \
+  php7-session \
+  php7-simplexml \
+  php7-soap \
+  php7-sockets \
+  php7-sqlite3 \
+  php7-tokenizer \
+  php7-xml \
+  php7-xmlreader \
+  php7-xmlwriter
+
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]
