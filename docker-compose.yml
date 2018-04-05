@@ -4,6 +4,10 @@ services:
   sshd:
     build:
       context: ./images/sshd
+      args:
+        - GIT_USER_NAME=${DOCKER_DEV_GIT_USER}
+        - GIT_USER_EMAIL=${DOCKER_DEV_GIT_EMAIL}
+        - GIT_EDITOR=vim
     image: webdev-sshd:latest
     container_name: sshd
     ports:

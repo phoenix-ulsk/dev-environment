@@ -13,12 +13,16 @@ RUN apk --no-cache update && \
     libjpeg-turbo \
     libmemcached \
     cyrus-sasl \
+    libmcrypt \
+    libxml2 \
     freetype-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     libmemcached-dev \
     cyrus-sasl-dev \
     pcre-dev \
+    libmcrypt-dev \
+    libxml2-dev \
     ${PHPIZE_DEPS} && \
   pecl install memcached-2.2.0 xdebug-2.5.5 && \
   docker-php-ext-configure gd \
@@ -27,16 +31,33 @@ RUN apk --no-cache update && \
     --with-jpeg-dir=/usr/include/ && \
   NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
   docker-php-ext-install -j${NPROC} gd \
+    calendar \
+    mcrypt \
+    soap \
+    sockets \
+    mysql \
+    mysqli \
+    opcache \
     pdo_mysql && \
   docker-php-ext-enable memcached \
     xdebug \
-    opcache && \
+    gd \
+    calendar \
+    mcrypt \
+    soap \
+    sockets \
+    mysql \
+    mysqli \
+    opcache \
+    pdo_mysql && \
   apk --no-cache del freetype-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     libmemcached-dev \
     cyrus-sasl-dev \
     pcre-dev \
+    libmcrypt-dev \
+    libxml2-dev \
     ${PHPIZE_DEPS} && \
   rm -rf /var/cache/apk/* /tmp/* && \
   curl -sS https://getcomposer.org/installer -o composer-setup.php && \
@@ -62,13 +83,16 @@ RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /d
   sed -i 's/;slowlog = log\/\$pool.log.slow/slowlog = \/var\/www\/log\/php\/56-slow.log/' /usr/local/etc/php-fpm.d/www.conf > /dev/null && \
   sed -i 's/;request_slowlog_timeout = 0/request_slowlog_timeout = 3/' /usr/local/etc/php-fpm.d/www.conf > /dev/null && \
   echo -e "opcache.enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "opcache.revalidate_freq=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.use_cwd=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.revalidate_path=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "opcache.max_accelerated_files=15000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.validate_timestamps=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.revalidate_freq=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.save_comments=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.load_comments=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.max_accelerated_files=10000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.memory_consumption=128" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.interned_strings_buffer=16" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "opcache.use_cwd=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "xdebug.remote_enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_autostart=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_connect_back=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \

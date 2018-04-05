@@ -1,6 +1,10 @@
-FROM alpine:latest
+FROM alpine:edge
 
 WORKDIR /var/www/html/
+
+ARG GIT_USER_NAME
+ARG GIT_USER_EMAIL
+ARG GIT_EDITOR
 
 # Install packages and create www-data user
 RUN apk --no-cache update && \
@@ -11,6 +15,8 @@ RUN apk --no-cache update && \
     vim \
     git \
     git-bash-completion \
+    git-diff-highlight \
+    less \
     shadow \
     bash \
     bash-doc \
@@ -45,7 +51,13 @@ USER www-data
 RUN echo -e "#!/bin/bash" | tee -a /home/www-data/.profile > /dev/null && \
   echo -e "\nalias vi='vim'" | tee -a /home/www-data/.profile > /dev/null && \
   echo -e "\nalias mysql='mysql -hmysql5 -uroot -proot'" | tee -a /home/www-data/.profile > /dev/null && \
-  echo -e "alias mysqldump='mysqldump -hmysql5 -uroot -proot'" | tee -a /home/www-data/.profile > /dev/null
+  echo -e "alias mysqldump='mysqldump -hmysql5 -uroot -proot'" | tee -a /home/www-data/.profile > /dev/null && \
+  echo -e "[user]" | tee -a /home/www-data/.gitconfig > /dev/null && \
+  echo -e "\tname = ${GIT_USER_NAME}" | tee -a /home/www-data/.gitconfig > /dev/null && \
+  echo -e "\temail = ${GIT_USER_EMAIL}" | tee -a /home/www-data/.gitconfig > /dev/null && \
+  echo -e "[core]" | tee -a /home/www-data/.gitconfig > /dev/null && \
+  echo -e "\teditor = ${GIT_EDITOR}" | tee -a /home/www-data/.gitconfig > /dev/null
+
 USER root
 
 EXPOSE 22
