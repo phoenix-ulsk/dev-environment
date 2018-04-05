@@ -1,4 +1,4 @@
-FROM php:7.1-fpm-alpine
+FROM php:7.1-fpm-alpine AS webdev-php71
 
 ENV ROOT_PASSWORD=root
 
@@ -6,8 +6,7 @@ WORKDIR /var/www/html/
 
 # Install aditional libs
 RUN apk --no-cache update && \
-  apk --no-cache add mysql-client \
-    ssmtp \
+  apk --no-cache add ssmtp \
     freetype \
     libpng \
     libjpeg-turbo \
@@ -24,7 +23,7 @@ RUN apk --no-cache update && \
     libmcrypt-dev \
     libxml2-dev \
     ${PHPIZE_DEPS} && \
-  pecl install memcached xdebug && \
+  pecl install memcached && \
   docker-php-ext-configure gd \
     --with-freetype-dir=/usr/include/ \
     --with-png-dir=/usr/include/ \
@@ -39,7 +38,6 @@ RUN apk --no-cache update && \
     opcache \
     pdo_mysql && \
   docker-php-ext-enable memcached \
-    xdebug \
     gd \
     calendar \
     mcrypt \
@@ -90,9 +88,21 @@ RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /d
   echo -e "opcache.max_accelerated_files=10000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.memory_consumption=128" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.interned_strings_buffer=16" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "xdebug.remote_enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
-  echo -e "xdebug.remote_autostart=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null
+
+USER www-data
+
+FROM webdev-php71 AS webdev-php71debug
+
+USER root
+
+RUN apk --no-cache add ${PHPIZE_DEPS} && \
+  pecl install xdebug && \
+  docker-php-ext-enable xdebug && \
+  apk --no-cache del ${PHPIZE_DEPS}
+
+RUN echo -e "xdebug.remote_enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.remote_autostart=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_connect_back=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_handler=dbgp" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_mode=req" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \

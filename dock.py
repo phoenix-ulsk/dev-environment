@@ -148,10 +148,11 @@ def dockerSetup():
         if "dev.local" not in hosts.read():
             hosts_list = """
 {0}\tdev.local
-{0}\tdev5.local
-{0}\tdev70.local
+{0}\tdebug.local
+{0}\tdev56.local
+{0}\tdebug56.local
 {0}\tdev71.local
-{0}\tdev72.local
+{0}\tdebug71.local
 {0}\tphpmyadmin.local
 {0}\tmailcatcher.local""".format(config["docker"]["ip"])
             os.system("echo \"{0}\" | sudo tee -a {1} > /dev/null".format(hosts_list, config["system"]["hosts"]))
