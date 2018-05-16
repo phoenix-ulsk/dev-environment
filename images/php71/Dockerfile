@@ -102,8 +102,8 @@ RUN apk --no-cache add ${PHPIZE_DEPS} && \
   apk --no-cache del ${PHPIZE_DEPS}
 
 RUN echo -e "xdebug.remote_enable=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
-  echo -e "xdebug.remote_autostart=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_connect_back=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
+  echo -e "xdebug.remote_autostart=0" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_handler=dbgp" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_mode=req" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
   echo -e "xdebug.remote_host=10.254.254.254" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini > /dev/null && \
