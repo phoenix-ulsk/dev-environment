@@ -48,27 +48,15 @@ services:
           - debug.local
           - dev56.local
           - dev71.local
+          - debug56.local
           - debug71.local
 
   php56:
     build:
       context: ./images/php56
-      target: webdev-php56
-    image: webdev-php56:latest
-    container_name: php56
-    volumes:
-      - type: volume
-        source: www
-        target: /var/www/
-    networks:
-      - backend
-
-  php56debug:
-    build:
-      context: ./images/php56
       target: webdev-php56debug
     image: webdev-php56debug:latest
-    container_name: php56debug
+    container_name: php56
     volumes:
       - type: volume
         source: www
@@ -79,22 +67,9 @@ services:
   php71:
     build:
       context: ./images/php71
-      target: webdev-php71
-    image: webdev-php71:latest
-    container_name: php71
-    volumes:
-      - type: volume
-        source: www
-        target: /var/www/
-    networks:
-      - backend
-
-  php71debug:
-    build:
-      context: ./images/php71
       target: webdev-php71debug
     image: webdev-php71debug:latest
-    container_name: php71debug
+    container_name: php71
     volumes:
       - type: volume
         source: www
