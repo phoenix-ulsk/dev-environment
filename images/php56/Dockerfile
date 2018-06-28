@@ -57,10 +57,7 @@ RUN apk --no-cache update && \
     libmcrypt-dev \
     libxml2-dev \
     ${PHPIZE_DEPS} && \
-  rm -rf /var/cache/apk/* /tmp/* && \
-  curl -sS https://getcomposer.org/installer -o composer-setup.php && \
-  php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-  rm composer-setup.php
+  rm -rf /var/cache/apk/* /tmp/*
 
 # Create www volume structure, because we do not know what container is the first to run and seed data to volume.
 # As a workaround for docker-compose v3 volumes management bug/feature: https://github.com/docker/compose/issues/4379
