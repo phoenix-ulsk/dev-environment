@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.4"
 
 services:
   sshd:
@@ -45,13 +45,17 @@ services:
       backend:
         aliases:
           - dev.local
+          - debug.local
           - dev56.local
           - dev71.local
+          - debug56.local
+          - debug71.local
 
   php56:
     build:
       context: ./images/php56
-    image: webdev-php56:latest
+      target: webdev-php56debug
+    image: webdev-php56debug:latest
     container_name: php56
     volumes:
       - type: volume
@@ -63,7 +67,8 @@ services:
   php71:
     build:
       context: ./images/php71
-    image: webdev-php71:latest
+      target: webdev-php71debug
+    image: webdev-php71debug:latest
     container_name: php71
     volumes:
       - type: volume
