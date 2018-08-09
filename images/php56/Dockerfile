@@ -87,7 +87,8 @@ RUN sed -i 's/mailhub=mail/mailhub=mailcatcher:1025/' /etc/ssmtp/ssmtp.conf > /d
   echo -e "opcache.max_accelerated_files=10000" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.memory_consumption=128" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
   echo -e "opcache.interned_strings_buffer=16" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
-  echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null
+  echo -e "opcache.fast_shutdown=1" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null && \
+  echo -e "opcache.error_log=/var/www/log/php/56-opcache.log" | tee -a /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini > /dev/null
 
 USER www-data
 
