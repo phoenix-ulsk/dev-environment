@@ -82,6 +82,8 @@ services:
       context: ./images/mysql5
     image: webdev-mysql5:latest
     container_name: mysql5
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
